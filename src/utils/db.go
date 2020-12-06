@@ -4,15 +4,24 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/joho/godotenv"
 	"github.com/nocubicles/skillbase.io/src/models"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
-//DbConnection returns the connection to use the db
-func DbConnection() *gorm.DB {
+var db *gorm.DB
+
+func init() {
+	var err error
+
+	err = godotenv.Load(".env")
+
+	if err != nil {
+		panic("cannot load .env file")
+	}
 	dsn := os.Getenv("DBConnectionString")
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 
 	if err != nil {
 		fmt.Println(err)
@@ -36,6 +45,10 @@ func DbConnection() *gorm.DB {
 	if err != nil {
 		panic(err)
 	}
+}
+
+//DbConnection returns the connection to use the db
+func DbConnection() *gorm.DB {
 
 	return db
 }
