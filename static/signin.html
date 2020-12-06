@@ -1,0 +1,22 @@
+{{ template "header.html" . }}
+
+<body>
+    <section class="section">
+        <div class="container">
+            <h1 class="title">Tere. Palun logige sisse.</h1>
+            <form action="/logisisse" method="POST" novalidate>
+                <div>
+                    {{ with .Errors.email }}
+                    <p class="error">{{ . }}</p>
+                    {{ end }}
+                </div>
+                <p><label>Teie email:</label></p>
+                <p><input type="email" name="email" value="{{ .Email }}"></p>
+                <div>
+                    <input type="submit" value="Logi sisse">
+                </div>
+            </form>
+        </div>
+    </section>
+</body>
+{{ template "footer.html" .}}
