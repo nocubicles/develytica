@@ -8,9 +8,10 @@ import (
 
 type Sync struct {
 	gorm.Model
-	TenantID       uint
-	UserID         uint
-	Name           string
-	LastRunSuccess bool `gorm:"default:false"`
+	TenantID       uint   `gorm:"primaryKey"`
+	UserID         uint   `gorm:"primaryKey"`
+	Name           string `gorm:"primaryKey"`
+	LastRunSuccess bool   `gorm:"default:false"`
 	LastRun        time.Time
+	Priority       int `gorm:"index"`
 }

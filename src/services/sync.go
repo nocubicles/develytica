@@ -11,10 +11,24 @@ import (
 	"gorm.io/gorm/clause"
 )
 
-var neededSyncs = []string{
-	"organization",
-	"repo",
-	"issue",
+type neededSync struct {
+	Name     string
+	Priority int
+}
+
+var neededSyncs = []neededSync{
+	{
+		Name:     "organization",
+		Priority: 1,
+	},
+	{
+		Name:     "repo",
+		Priority: 2,
+	},
+	{
+		Name:     "issue",
+		Priority: 3,
+	},
 }
 
 //UpdateSyncJobs ensures that user has syncs enabled
@@ -24,9 +38,10 @@ func UpdateSyncJobs(userID uint, tenantID uint) {
 	for _, neededSync := range neededSyncs {
 		sync := models.Sync{}
 		sync.TenantID = tenantID
-		sync.Name = neededSync
+		sync.Name = neededSync.Name
+		sync.Priority = neededSync.Priority
 		sync.UserID = userID
-		db.FirstOrCreate(&sync, models.Sync{Name: neededSync})
+		db.FirstOrCreate(&sync, models.Sync{Name: neededSync.Name})
 
 	}
 	DoSync()
@@ -40,7 +55,8 @@ func CreateSyncJobs(userID uint, tenantID uint) {
 	for _, neededSync := range neededSyncs {
 		sync := models.Sync{}
 		sync.TenantID = tenantID
-		sync.Name = neededSync
+		sync.Name = neededSync.Name
+		sync.Priority = neededSync.Priority
 		sync.UserID = userID
 		db.Create(&sync)
 	}
@@ -52,12 +68,12 @@ func DoSync() {
 	syncDateNeeded := time.Now().Add(-syncInterval)
 	db := utils.DbConnection()
 
-	result := db.Where("last_run < ?", syncDateNeeded).Find(&syncs)
+	result := db.Order("priority asc").Where("last_run < ?", syncDateNeeded).Find(&syncs)
 
 	//all syncs that needs new sync
 	if result.RowsAffected > 0 {
 		for _, sync := range syncs {
-			SyncGithubData(sync.UserID, sync.TenantID, sync.Name)
+			SyncGithubData(sync.UserID, sync.TenantID, sync.Name, sync.ID)
 		}
 	}
 }
@@ -75,9 +91,9 @@ func checkIfAcceptedError(err error) {
 }
 
 //SyncGithubData syncs user/tenant data from github
-func SyncGithubData(userID uint, tenantID uint, syncName string) {
+func SyncGithubData(userID uint, tenantID uint, syncName string, syncID uint) {
 	start := time.Now()
-
+	perPage := 100
 	db := utils.DbConnection()
 	ctx := context.Background()
 	userClaim := models.UserClaim{}
@@ -86,9 +102,11 @@ func SyncGithubData(userID uint, tenantID uint, syncName string) {
 	githubClient := utils.GetGithubClient(userClaim.AccessToken)
 
 	if syncName == "organization" {
+		syncHistory := initiateSyncHistory(userID, tenantID, syncID)
+
 		var allOrgs []*github.Organization
 		options := &github.ListOptions{
-			PerPage: 100,
+			PerPage: perPage,
 		}
 
 		for {
@@ -107,14 +125,14 @@ func SyncGithubData(userID uint, tenantID uint, syncName string) {
 		}
 
 		for i := range allOrgs {
-			org := models.GithubOrganization{}
+			org := models.Organization{}
 			githubOrg := allOrgs[i]
 			org.AvatarURL = githubOrg.GetAvatarURL()
 			org.Collaborators = githubOrg.GetCollaborators()
 			org.Company = githubOrg.GetCompany()
 			org.Login = githubOrg.GetLogin()
 			org.Name = githubOrg.GetName()
-			org.GithubID = githubOrg.GetID()
+			org.RemoteID = githubOrg.GetID()
 			org.Type = githubOrg.GetType()
 			org.Followers = githubOrg.GetFollowers()
 			org.UserID = userID
@@ -124,11 +142,120 @@ func SyncGithubData(userID uint, tenantID uint, syncName string) {
 				UpdateAll: true,
 			}).Create(&org)
 		}
+		finishSyncHistory(syncHistory)
 
 	} else if syncName == "repo" {
+		syncHistory := initiateSyncHistory(userID, tenantID, syncID)
+		var allRepos []*github.Repository
+		var allUserOrgs []models.Organization
+		options := &github.RepositoryListByOrgOptions{ListOptions: github.ListOptions{PerPage: perPage}}
+		db.Where("user_id = ? AND tenant_id = ? ", userID, tenantID).Find(&allUserOrgs)
 
+		for _, userOrg := range allUserOrgs {
+			for {
+				repos, response, err := githubClient.Repositories.ListByOrg(ctx, userOrg.Login, options)
+
+				if err != nil {
+					checkIfRateLimitErr(err)
+					checkIfAcceptedError(err)
+					fmt.Println(err)
+				}
+
+				allRepos = append(allRepos, repos...)
+
+				if response.NextPage == 0 {
+					break
+				}
+				options.Page = response.NextPage
+			}
+			for i := range allRepos {
+				repo := models.Repo{}
+				githubRepo := allRepos[i]
+				repo.Archived = githubRepo.GetArchived()
+				repo.DefaultBranch = githubRepo.GetDefaultBranch()
+				repo.Description = githubRepo.GetDescription()
+				repo.Disabled = githubRepo.GetDisabled()
+				repo.FullName = githubRepo.GetFullName()
+				repo.RemoteID = githubRepo.GetID()
+				repo.HTMLURL = githubRepo.GetHTMLURL()
+				repo.HasIssues = githubRepo.GetHasIssues()
+				repo.HasProjects = githubRepo.GetHasProjects()
+				repo.Homepage = githubRepo.GetHomepage()
+				repo.MasterBranch = githubRepo.GetMasterBranch()
+				repo.Name = githubRepo.GetName()
+				repo.OpenIssuesCount = githubRepo.GetOpenIssuesCount()
+				repo.RemoteOrgID = userOrg.RemoteID
+				repo.Private = githubRepo.GetPrivate()
+				repo.PushedAt = githubRepo.GetPushedAt().Time
+				repo.Size = githubRepo.GetSize()
+				repo.StargazersCount = githubRepo.GetStargazersCount()
+				repo.SubscribersCount = githubRepo.GetSubscribersCount()
+				repo.TeamID = githubRepo.GetTeamID()
+				repo.TenantID = tenantID
+				repo.UserID = userID
+				repo.WatchersCount = githubRepo.GetWatchersCount()
+				repo.UpdatedAt = githubRepo.GetUpdatedAt().Time
+
+				db.Clauses(clause.OnConflict{
+					UpdateAll: true,
+				}).Create(&repo)
+			}
+		}
+
+		finishSyncHistory(syncHistory)
 	} else if syncName == "issue" {
+		syncHistory := initiateSyncHistory(userID, tenantID, syncID)
+		var allIssues []*github.Issue
+		var allUserRepos []models.Repo
+		options := &github.IssueListByRepoOptions{ListOptions: github.ListOptions{PerPage: perPage}}
+		db.Where("user_id = ? AND tenant_id = ? ", userID, tenantID).Find(&allUserRepos)
 
+		for _, userRepo := range allUserRepos {
+			for {
+				repoOrg := models.Organization{}
+				db.Select("login").Where("user_id = ? AND tenant_id = ? AND remote_id = ?", userID, tenantID, userRepo.RemoteOrgID).Find(&repoOrg)
+
+				issues, response, err := githubClient.Issues.ListByRepo(ctx, repoOrg.Login, userRepo.Name, options)
+
+				if err != nil {
+					checkIfRateLimitErr(err)
+					checkIfAcceptedError(err)
+					fmt.Println(err)
+				}
+				allIssues = append(allIssues, issues...)
+				if response.NextPage == 0 {
+					break
+				}
+
+				options.Page = response.NextPage
+			}
+		}
+
+		for i := range allIssues {
+			issue := models.Issue{}
+			githubIssue := allIssues[i]
+			issue.UserID = userID
+			issue.TenantID = tenantID
+			issue.AssigneeID = githubIssue.GetAssignee().GetID()
+			issue.AuthorAssociation = githubIssue.GetAuthorAssociation()
+			issue.ClosedAt = githubIssue.GetClosedAt()
+			issue.CreatedAt = githubIssue.GetCreatedAt()
+			issue.ClosedByID = githubIssue.GetClosedBy().GetID()
+			issue.RemoteID = githubIssue.GetID()
+			issue.Locked = githubIssue.GetLocked()
+			issue.Number = githubIssue.GetNumber()
+			issue.RemoteUserID = githubIssue.GetUser().GetID()
+			issue.State = githubIssue.GetState()
+			issue.Title = githubIssue.GetTitle()
+
+			db.Clauses(clause.OnConflict{
+				UpdateAll: true,
+			}).Create(&issue)
+			syncLabelsFromIssue(userID, tenantID, issue.RemoteID, githubIssue.Labels)
+			syncUsersFromIssue(userID, tenantID, issue.RemoteID, githubIssue.Assignees)
+
+		}
+		finishSyncHistory(syncHistory)
 	}
 
 	// orgIssues, _, _ := githubClient.Issues.ListByOrg(ctx, orgName, nil)
@@ -145,4 +272,76 @@ func SyncGithubData(userID uint, tenantID uint, syncName string) {
 
 	fmt.Printf("Sync duration: %v", time.Since(start).Milliseconds())
 
+}
+
+func syncLabelsFromIssue(userID uint, tenantID uint, issueID int64, RemoteIssueLabels []*github.Label) {
+	db := utils.DbConnection()
+
+	for i := range RemoteIssueLabels {
+		remoteIssueLabel := RemoteIssueLabels[i]
+		label := models.Label{}
+		label.Color = remoteIssueLabel.GetColor()
+		label.Description = remoteIssueLabel.GetDescription()
+		label.RemoteID = remoteIssueLabel.GetID()
+		label.Name = remoteIssueLabel.GetName()
+		label.TenantID = tenantID
+		label.UserID = userID
+		label.Url = remoteIssueLabel.GetURL()
+		db.Clauses(clause.OnConflict{
+			UpdateAll: true,
+		}).Create(&label)
+
+		issueLabel := models.IssueLabel{}
+		issueLabel.IssueID = issueID
+		issueLabel.TenantID = tenantID
+		issueLabel.UserID = userID
+		db.FirstOrCreate(&issueLabel)
+	}
+
+}
+
+func syncUsersFromIssue(userID uint, tenantID uint, issueID int64, RemoteIssueUsers []*github.User) {
+	db := utils.DbConnection()
+
+	for i := range RemoteIssueUsers {
+		RemoteIssueUser := RemoteIssueUsers[i]
+		assignee := models.Assignee{}
+		assignee.RemoteID = RemoteIssueUser.GetID()
+		assignee.AvatarURL = RemoteIssueUser.GetAvatarURL()
+		assignee.Location = RemoteIssueUser.GetLocation()
+		assignee.Login = RemoteIssueUser.GetLogin()
+		assignee.Name = RemoteIssueUser.GetName()
+		assignee.TenantID = tenantID
+		assignee.UserID = tenantID
+		db.Clauses(clause.OnConflict{
+			UpdateAll: true,
+		}).Create(&assignee)
+
+		issueUser := models.IssueAssignee{}
+		issueUser.AssigneeID = RemoteIssueUser.GetID()
+		issueUser.IssueID = issueID
+		issueUser.TenantID = tenantID
+		issueUser.UserID = userID
+		db.FirstOrCreate(&issueUser)
+	}
+
+}
+
+func initiateSyncHistory(userID uint, tenantID uint, syncID uint) (syncHistoryID *models.SyncHistory) {
+	db := utils.DbConnection()
+	syncHistory := models.SyncHistory{}
+	syncHistory.UserID = userID
+	syncHistory.TenantID = tenantID
+	syncHistory.Success = false
+	syncHistory.SyncStart = time.Now()
+	syncHistory.SyncID = syncID
+	db.Create(&syncHistory)
+	return &syncHistory
+}
+
+func finishSyncHistory(syncHistory *models.SyncHistory) {
+	db := utils.DbConnection()
+	syncHistory.Success = true
+	syncHistory.SyncEnd = time.Now()
+	db.Clauses(clause.OnConflict{UpdateAll: true}).Create(&syncHistory)
 }

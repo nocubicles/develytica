@@ -41,8 +41,13 @@ func init() {
 		&models.UserClaim{},
 		&models.Sync{},
 		&models.SyncHistory{},
-		&models.GithubOrganization{},
-		&models.GithubRepo{},
+		&models.Organization{},
+		&models.Repo{},
+		&models.Assignee{},
+		&models.Issue{},
+		&models.Label{},
+		&models.IssueAssignee{},
+		&models.IssueLabel{},
 	)
 
 	if err != nil {
