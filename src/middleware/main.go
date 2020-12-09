@@ -24,13 +24,30 @@ func LoggingMiddleware(next http.Handler) http.Handler {
 	})
 }
 
+func CheckCookie(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		cookie, _ := r.Cookie("skillbase")
+
+		if cookie != nil {
+			http.Redirect(w, r, "/app", http.StatusTemporaryRedirect)
+			return
+		}
+		next(w, r)
+
+	}
+}
+
 func CheckIsUsedLoggedIn(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		cookie, err := r.Cookie("skillbase")
 		if err != nil {
-			http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+			currentPath := r.URL.Path
+			if currentPath != "/" {
+				http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+				return
+			}
 
-			return
+			next(w, r)
 		}
 		sessionID := cookie.Value
 

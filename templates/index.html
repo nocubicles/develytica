@@ -2,8 +2,9 @@
 <html>
 {{ template "head.html" . }}
 <body>
+	{{ template "header.html" . }}
+
     <section class="hero is-fullheight is-default is-bold">
-        {{ template "header.html" . }}
         <div class="hero-body">
             <div class="container has-text-centered">
                 <div class="columns is-vcentered">
@@ -29,7 +30,7 @@
                 </div>
             </div>
         </div>
-        {{ template "footer.html" .}}
     </section>
+	{{ template "footer.html" .}}
 </body>
 </html>
