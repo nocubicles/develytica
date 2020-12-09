@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"fmt"
 	"net/http"
 	"time"
 
@@ -56,19 +55,8 @@ func getAdsData(ads *[]models.Ad) []AdData {
 	return adsData
 }
 
-func RenderHome(w http.ResponseWriter, r *http.Request) (int, error) {
+func RenderHome(w http.ResponseWriter, r *http.Request) {
 
-	ads := &[]models.Ad{}
-	users := &[]models.User{}
-	db := utils.DbConnection()
+	utils.Render(w, "index.html", nil)
 
-	result2 := db.Find(&users)
-	fmt.Println(result2)
-	result := db.Limit(12).Select("title", "ID", "CreatedAt", "price").Find(&ads)
-	data := []AdData{}
-	if result.RowsAffected > 0 {
-		data = getAdsData(ads)
-		return http.StatusOK, utils.Render(w, "index.html", data)
-	}
-	return http.StatusOK, utils.Render(w, "index.html", data)
 }

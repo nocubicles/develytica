@@ -1,0 +1,89 @@
+{{ template "header.html" . }}
+<body>
+	<section class="section">
+		<div class="container">
+			<h1 class="title">
+				{{ .Title}} {{ .FrameSize}} {{.FrameSizeDesc}}
+			</h1>
+
+			<table class="table">
+				<tbody>
+					<tr>
+						<th>
+							Kuulutuse tüüp
+						</th>
+						<td>
+							{{ .Direction}}
+						</td>
+					</tr>
+					<tr>
+						<th>
+							Kuulutuse ese
+						</th>
+						<td>
+							{{ .AdType}}
+						</td>
+					</tr>
+					<tr>
+						<th>
+							Ratta tüüp
+						</th>
+						<td>
+							{{ .BikeType}}
+						</td>
+					</tr>
+					<tr>
+						<th>
+							Raamu materjal
+						</th>
+						<td>
+							{{ .FrameMaterial}}
+						</td>
+					</tr>
+					<tr>
+						<th>
+							Raami suurus
+						</th>
+						<td>
+							{{ .FrameSize}} {{ .FrameSizeDesc}}
+						</td>
+					</tr>
+					<tr>
+						<th>
+							Asukoht
+						</th>
+						<td>
+							{{ .Location}} {{ .LocationDetailDesc}}
+						</td>
+					</tr>
+					<tr>
+						<th>
+							Telefon
+						</th>
+						<td>
+							{{ .Phone}}
+						</td>
+					</tr>
+					<tr>
+						<th>
+							Hind
+						</th>
+						<td>
+							{{ .Price}}
+						</td>
+					</tr>
+				</tbody>
+			</table>
+			<div class="block">
+				{{ .Description}}
+			</div>
+
+			{{range .Images}}
+			<img src={{ .}}>
+
+			{{end}}
+
+		</div>
+	</section>
+</body>
+{{ template "footer.html" .}}

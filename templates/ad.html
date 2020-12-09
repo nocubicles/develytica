@@ -1,0 +1,230 @@
+{{ template "header.html" . }}
+
+<body>
+    <section class="section">
+        <div class="container">
+            <form action="/kuulutus" method="POST" enctype="multipart/form-data" novalidate id="adForm">
+                <div class="field">
+                    <label class="label">Kuulutuse tüüp</label>
+                    <div class="control">
+                        {{range .Directions}}
+                        <label class="radio">
+						<input type="radio" name="direction" value={{ .ID}} {{if eq .Value "Müük"}}checked{{ end }}>
+						{{.Value}} </label> {{end}}
+                    </div>
+                    {{ with .Ad.ValidationErrors.AdDirectionID}}
+                    <p class="help is-danger">{{ .}}</p>
+                    {{ end }}
+                </div>
+
+                <div class="field">
+                    <label class="label">Kategooria</label>
+                    <div class="control">
+                        <div class="select">
+                            <select id="adCategory" name="adType">
+                            <option value=0>Palun valige</option>
+							{{range .AdTypes}}
+							<option value={{ .ID}} {{if eq .IsSelected true}}selected{{end}}>{{ .Value}}</option>
+							{{end}}
+						</select>
+                        </div>
+                    </div>
+                    {{ with .Ad.ValidationErrors.AdTypeID}}
+                    <p class="help is-danger">{{ .}}</p>
+                    {{ end }}
+                </div>
+
+                <div class="field-group" id="bikeOptions">
+                    <div class="field">
+                        <label class="label">Jalgratta tüüp</label>
+                        <div class="control">
+                            <div class="select">
+                                <select name="bikeType">
+									<option value=0>Palun valige</option>
+									{{range .BikeTypes}}
+									<option value={{ .ID}} {{if eq .IsSelected true}}selected{{end}}>{{ .Value}}</option>
+									{{end}}
+								</select>
+                            </div>
+                        </div>
+                        {{ with .Ad.ValidationErrors.BikeTypeID}}
+                        <p class="help is-danger">{{ .}}</p>
+                        {{ end }}
+                    </div>
+
+                    <div class="field-group">
+                        <div class="field is-inline-block-desktop">
+                            <label class="label">Raami suurus</label>
+                            <div class="control">
+                                <div class="select">
+                                    <select name="frameSize">
+										<option value=0>Palun valige</option>
+										{{range .FrameSizes}}
+										<option value={{ .ID}} {{if eq .IsSelected true}}selected{{end}}>{{ .Value}}</option>
+										{{end}}
+									</select>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="field is-inline-block-desktop">
+                            <label class="label is-small">Raami suuruse täpsustus</label>
+                            <div class="control">
+                                <input name="frameSizeDesc" class="input is-small" type="text" placeholder="56cm" value={{ .FrameSizeDesc}}>
+                            </div>
+                        </div>
+                        {{ with .Ad.ValidationErrors.FrameSizeID}}
+                        <p class="help is-danger">{{ .}}</p>
+                        {{ end }} {{ with .Ad.ValidationErrors.FrameDesc}}
+                        <p class="help is-danger">{{ .}}</p>
+                        {{ end }}
+                    </div>
+
+                    <div class="filed">
+                        <label class="label">Raami materjal</label>
+                        <div class="control">
+                            <div class="select">
+                                <select name="frameMaterial">
+									<option value=0>Palun valige</option>
+									{{range .FrameMaterials}}
+									<option value={{ .ID}} {{if eq .IsSelected true}}selected{{end}}>{{ .Value}}</option>
+									{{end}}
+								</select>
+                            </div>
+                        </div>
+                    </div>
+                    {{ with .Ad.ValidationErrors.FrameMaterialID}}
+                    <p class="help is-danger">{{ .}}</p>
+                    {{ end }}
+                </div>
+
+                <div class="field">
+                    <label class="label">Kuulutuse pealkiri</label>
+                    <div class="control">
+                        <input name="adTitle" class="input" type="text" placeholder="Scott CR1 Pro 56CM" value={{ .Title}}>
+                    </div>
+                    {{ with .Ad.ValidationErrors.Title}}
+                    <p class="help is-danger">{{ .}}</p>
+                    {{ end }}
+                </div>
+
+                <div class="field">
+                    <label class="label">Hind</label>
+                    <div class="control">
+                        <input name="price" class="input" type="number" value={{ .Price}}>
+                    </div>
+                    {{ with .Ad.ValidationErrors.Price}}
+                    <p class="help is-danger">{{ .}}</p>
+                    {{ end }}
+                </div>
+
+                <div class="field-group">
+                    <div class="field is-inline-block-desktop">
+                        <label class="label">Asukoht</label>
+                        <div class="control">
+                            <div class="select">
+                                <select name="location">
+									<option value=0>Palun valige</option>
+									{{range .Locations}}
+									<option value={{ .ID}} {{if eq .IsSelected true}}selected{{end}}>{{ .Value}}</option>
+									{{end}}
+							</select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="field is-inline-block-desktop">
+                        <label class="label is-small">Täpsem asukoht</label>
+                        <div class="control">
+                            <input name="locationDesc" class="input is-small" type="text" placeholder="Võru" value={{ .LocationDesc}}>
+                        </div>
+
+                    </div>
+                    {{ with .Ad.ValidationErrors.LocationID}}
+                    <p class="help is-danger">{{ .}}</p>
+                    {{ end }} {{ with .Ad.ValidationErrors.LocationDesc}}
+                    <p class="help is-danger">{{ .}}</p>
+                    {{ end }}
+                </div>
+
+                <div class="field">
+                    <label for="phone" class="label">Telefoni nr.</label>
+                    <div class="control">
+                        <input class="input" type="tel" name="phoneNo" placeholder="523465464" value={{ .Phone}}>
+                    </div>
+                    {{ with .Ad.ValidationErrors.Phone}}
+                    <p class="help is-danger">{{ .}}</p>
+                    {{ end }}
+                </div>
+
+                <div class="field">
+                    <label class="label">Lisainfo</label>
+                    <div class="control">
+                        <textarea name="adDescription" class="textarea" placeholder="Lisainfo" value={{ .Description}}></textarea>
+                    </div>
+                    {{ with .Ad.ValidationErrors.Description}}
+                    <p class="help is-danger">{{ .}}</p>
+                    {{ end }}
+                </div>
+
+                <div class="file is-boxed">
+                    <label class="file-label">
+						<input class="file-input" type="file" name="images" multiple id="userPictures">
+						<span class="file-cta">
+						<span class="file-icon">
+							<i class="fas fa-upload"></i>
+						</span>
+						<span class="file-label" id="selectedPictures">
+							Vali pildid
+						</span>
+						</span>
+					</label> {{ with .ImageUploadError}}
+                    <p class="help is-danger">{{ .}}</p>
+                    {{ end }}
+                </div>
+
+                <div class="field is-grouped pt-4">
+                    <div class="control">
+                        <button type="submit" class="button is-link">Saada</button>
+                    </div>
+                    <div class="control">
+                        <button class="button is-link is-light">Tühista</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </section>
+    <script>
+        const imageUploads = document.getElementById("userPictures");
+        imageUploads.addEventListener("change", () => {
+            const selectedImagesCount = imageUploads.files.length
+            const imageNotificationPlace = document.getElementById("selectedPictures")
+			if (selectedImagesCount > 5) {
+	            imageNotificationPlace.innerText = `Palun valida kuni 5 pilti`
+			} else {
+				imageNotificationPlace.innerText = `Valitud ${selectedImagesCount} pilti`
+			}
+        })
+
+        const bikeOptions = document.getElementById("bikeOptions");
+        const adCategory = document.getElementById("adCategory");
+        window.onload = () => {
+            hideFormFields()
+        }
+
+        adCategory.addEventListener("change", () => {
+            hideFormFields()
+        })
+
+        const hideFormFields = () => {
+
+            if (adCategory.value.toLowerCase() !== "1") {
+                bikeOptions.style.display = 'none';
+            }
+            if (adCategory.value.toLowerCase() === "1") {
+                bikeOptions.style.display = 'block';
+            }
+        }
+    </script>
+</body>
+{{ template "footer.html" .}}

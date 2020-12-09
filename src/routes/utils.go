@@ -17,10 +17,11 @@ func setCookieForUser(w http.ResponseWriter, email string) error {
 	}
 
 	cookie := http.Cookie{
-		Name:     "skillbase.io",
+		Name:     "skillbase",
 		Value:    sessionID.String(),
 		Expires:  expiration,
 		HttpOnly: true,
+		Path:     "/",
 	}
 
 	http.SetCookie(w, &cookie)

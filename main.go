@@ -28,7 +28,8 @@ func main() {
 	defer sqlDB.Close()
 
 	log.Println("Listening..")
-	err = http.ListenAndServe(":3000", router())
+	router := router()
+	err = http.ListenAndServe(":3000", router)
 
 	if err != nil {
 		log.Fatal(err)

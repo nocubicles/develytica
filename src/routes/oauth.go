@@ -33,14 +33,13 @@ func init() {
 	githubOauthConfig.Endpoint = github.Endpoint
 }
 
-func GithubOauthLogin(w http.ResponseWriter, r *http.Request) (int, error) {
+func GithubOauthLogin(w http.ResponseWriter, r *http.Request) {
 	oauthState := generateStateOauthCookie(w)
 	u := githubOauthConfig.AuthCodeURL(oauthState)
 	http.Redirect(w, r, u, http.StatusTemporaryRedirect)
-	return http.StatusOK, nil
 }
 
-func GithubOauthCallback(w http.ResponseWriter, r *http.Request) (int, error) {
+func GithubOauthCallback(w http.ResponseWriter, r *http.Request) {
 	oauthState, err := r.Cookie("oauthstate")
 
 	if err != nil {
@@ -50,24 +49,24 @@ func GithubOauthCallback(w http.ResponseWriter, r *http.Request) (int, error) {
 	responseStateValue := r.URL.Query().Get("state")
 
 	if responseStateValue != oauthState.Value {
-		return http.StatusInternalServerError, fmt.Errorf("Invalid github oauth state")
+		fmt.Println("Invalid github oauth state")
+		return
 	}
 
 	code := r.URL.Query().Get("code")
 
 	user, err := setupUserFromGithub(code)
 	if err != nil {
-		return http.StatusInternalServerError, err
+		fmt.Println(err)
+		return
 	}
 
 	err = setCookieForUser(w, user.Email)
 	if err != nil {
-		return http.StatusInternalServerError, err
+		fmt.Println(err)
 	}
+
 	http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
-
-	return http.StatusOK, nil
-
 }
 
 func setupUserFromGithub(code string) (models.User, error) {

@@ -258,18 +258,6 @@ func SyncGithubData(userID uint, tenantID uint, syncName string, syncID uint) {
 		finishSyncHistory(syncHistory)
 	}
 
-	// orgIssues, _, _ := githubClient.Issues.ListByOrg(ctx, orgName, nil)
-
-	// for i := range orgIssues {
-	// 	labels := *&orgIssues[i].Labels
-
-	// 	for x := range labels {
-	// 		label := *labels[x]
-
-	// 		fmt.Println(label)
-	// 	}
-	// }
-
 	fmt.Printf("Sync duration: %v", time.Since(start).Milliseconds())
 
 }
@@ -286,7 +274,7 @@ func syncLabelsFromIssue(userID uint, tenantID uint, issueID int64, RemoteIssueL
 		label.Name = remoteIssueLabel.GetName()
 		label.TenantID = tenantID
 		label.UserID = userID
-		label.Url = remoteIssueLabel.GetURL()
+		label.URL = remoteIssueLabel.GetURL()
 		db.Clauses(clause.OnConflict{
 			UpdateAll: true,
 		}).Create(&label)
