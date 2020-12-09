@@ -28,7 +28,7 @@ func CheckIsUsedLoggedIn(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		cookie, err := r.Cookie("skillbase")
 		if err != nil {
-			utils.Render(w, "index.html", nil)
+			http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 
 			return
 		}
@@ -47,7 +47,7 @@ func CheckIsUsedLoggedIn(next http.HandlerFunc) http.HandlerFunc {
 			}
 			next(w, r)
 		} else {
-			utils.Render(w, "index.html", nil)
+			http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 
 			return
 		}

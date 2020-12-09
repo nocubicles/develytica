@@ -13,7 +13,7 @@ func router() *mux.Router {
 	router := mux.NewRouter()
 	router.Use(middleware.CORS)
 	router.Use(middleware.LoggingMiddleware)
-	router.HandleFunc("/", middleware.CheckIsUsedLoggedIn(routes.RenderHome)).Methods(http.MethodGet, http.MethodOptions)
+	router.HandleFunc("/", routes.RenderHome).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/app", middleware.CheckIsUsedLoggedIn(routes.RenderApp)).Methods(http.MethodGet, http.MethodOptions)
 
 	router.HandleFunc("/auth/github/signin", routes.GithubOauthLogin).Methods(http.MethodGet, http.MethodPost, http.MethodOptions)

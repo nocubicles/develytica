@@ -66,7 +66,7 @@ func GithubOauthCallback(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(err)
 	}
 
-	http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+	http.Redirect(w, r, "/app", http.StatusTemporaryRedirect)
 }
 
 func setupUserFromGithub(code string) (models.User, error) {
