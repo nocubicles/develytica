@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"sort"
-	"strconv"
 	"strings"
 	"time"
 
@@ -246,15 +245,4 @@ func ReceiveAdForm(w http.ResponseWriter, r *http.Request) {
 
 func getOpenUntil() time.Time {
 	return time.Now().Add(time.Hour * 14 * 24)
-}
-
-func convertStringToUint(value string) uint {
-
-	u64, err := strconv.ParseUint(value, 10, 64)
-	if err != nil {
-		fmt.Println(err)
-		return 0
-	}
-
-	return uint(u64)
 }

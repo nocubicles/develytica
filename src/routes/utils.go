@@ -2,8 +2,10 @@ package routes
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/gofrs/uuid"
@@ -58,4 +60,15 @@ func getAuthContextData(r *http.Request) (types.AuthContext, error) {
 		return authContext, errors.New("Getting auth context failed")
 	}
 	return authContext, nil
+}
+
+func convertStringToUint(value string) uint {
+
+	u64, err := strconv.ParseUint(value, 10, 64)
+	if err != nil {
+		fmt.Println(err)
+		return 0
+	}
+
+	return uint(u64)
 }

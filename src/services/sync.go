@@ -1,7 +1,6 @@
 package services
 
 import (
-	"context"
 	"fmt"
 	"time"
 
@@ -95,11 +94,8 @@ func SyncGithubData(userID uint, tenantID uint, syncName string, syncID uint) {
 	start := time.Now()
 	perPage := 100
 	db := utils.DbConnection()
-	ctx := context.Background()
-	userClaim := models.UserClaim{}
-	db.Where("tenant_id = ? AND user_id = ?", tenantID, userID).Find(&userClaim)
 
-	githubClient := utils.GetGithubClient(userClaim.AccessToken)
+	githubClient, ctx := utils.GetGithubClientByUserAndTenant(userID, tenantID)
 
 	if syncName == "organization" {
 		syncHistory := initiateSyncHistory(userID, tenantID, syncID)
@@ -125,22 +121,8 @@ func SyncGithubData(userID uint, tenantID uint, syncName string, syncID uint) {
 		}
 
 		for i := range allOrgs {
-			org := models.Organization{}
-			githubOrg := allOrgs[i]
-			org.AvatarURL = githubOrg.GetAvatarURL()
-			org.Collaborators = githubOrg.GetCollaborators()
-			org.Company = githubOrg.GetCompany()
-			org.Login = githubOrg.GetLogin()
-			org.Name = githubOrg.GetName()
-			org.RemoteID = githubOrg.GetID()
-			org.Type = githubOrg.GetType()
-			org.Followers = githubOrg.GetFollowers()
-			org.UserID = userID
-			org.TenantID = tenantID
+			SyncGithubOrganization(allOrgs[i], userID, tenantID)
 
-			db.Clauses(clause.OnConflict{
-				UpdateAll: true,
-			}).Create(&org)
 		}
 		finishSyncHistory(syncHistory)
 
@@ -332,4 +314,24 @@ func finishSyncHistory(syncHistory *models.SyncHistory) {
 	syncHistory.Success = true
 	syncHistory.SyncEnd = time.Now()
 	db.Clauses(clause.OnConflict{UpdateAll: true}).Create(&syncHistory)
+}
+
+//SyncGithubOrganization syncs github organization to db
+func SyncGithubOrganization(githubOrg *github.Organization, userID uint, tenantID uint) {
+	db := utils.DbConnection()
+	org := models.Organization{}
+	org.AvatarURL = githubOrg.GetAvatarURL()
+	org.Collaborators = githubOrg.GetCollaborators()
+	org.Company = githubOrg.GetCompany()
+	org.Login = githubOrg.GetLogin()
+	org.Name = githubOrg.GetName()
+	org.RemoteID = githubOrg.GetID()
+	org.Type = githubOrg.GetType()
+	org.Followers = githubOrg.GetFollowers()
+	org.UserID = userID
+	org.TenantID = tenantID
+
+	db.Clauses(clause.OnConflict{
+		UpdateAll: true,
+	}).Create(&org)
 }

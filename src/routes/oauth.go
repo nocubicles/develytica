@@ -81,7 +81,7 @@ func setupUserFromGithub(code string) (models.User, error) {
 		return user, fmt.Errorf("code exchange wrong: %s", err.Error())
 	}
 
-	githubClient := utils.GetGithubClient(token.AccessToken)
+	githubClient, ctx := utils.GetGithubClientByToken(token.AccessToken)
 
 	githubUser, _, err := githubClient.Users.Get(ctx, "")
 

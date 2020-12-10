@@ -18,7 +18,7 @@ func router() *mux.Router {
 	router.HandleFunc("/auth/github/callback", routes.GithubOauthCallback).Methods(http.MethodGet, http.MethodPost, http.MethodOptions)
 
 	router.HandleFunc("/app", middleware.CheckIsUsedLoggedIn(routes.RenderApp)).Methods(http.MethodGet, http.MethodOptions)
-	router.HandleFunc("/organizations", middleware.CheckIsUsedLoggedIn(routes.RenderOrganizationPage)).Methods(http.MethodGet, http.MethodPost, http.MethodOptions)
+	router.HandleFunc("/organizations", middleware.CheckIsUsedLoggedIn(routes.Organization)).Methods(http.MethodGet, http.MethodPost, http.MethodOptions)
 	router.Use(mux.CORSMethodMiddleware(router))
 	router.PathPrefix("/assets/").Handler(http.StripPrefix("/assets/", http.FileServer(http.Dir("assets/"))))
 	return router
