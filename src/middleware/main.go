@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/nocubicles/skillbase.io/src/models"
+	"github.com/nocubicles/skillbase.io/src/types"
 	"github.com/nocubicles/skillbase.io/src/utils"
 )
 
@@ -57,7 +58,13 @@ func CheckIsUsedLoggedIn(next http.HandlerFunc) http.HandlerFunc {
 
 		if result.RowsAffected > 0 {
 
-			ctx := context.WithValue(r.Context(), "userID", uint(session.UserID))
+			authContext := types.AuthContext{
+				UserID:   uint(session.UserID),
+				TenantID: uint(session.TenantID),
+			}
+
+			ctx := context.WithValue(r.Context(), "authContext", authContext)
+
 			r := r.WithContext(ctx)
 			if r.URL.Path == "/" {
 				http.Redirect(w, r, "/app", http.StatusTemporaryRedirect)

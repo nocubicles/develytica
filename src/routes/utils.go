@@ -1,11 +1,14 @@
 package routes
 
 import (
+	"errors"
+	"log"
 	"net/http"
 	"time"
 
 	"github.com/gofrs/uuid"
 	"github.com/nocubicles/skillbase.io/src/models"
+	"github.com/nocubicles/skillbase.io/src/types"
 	"github.com/nocubicles/skillbase.io/src/utils"
 )
 
@@ -39,8 +42,20 @@ func saveSession(email string, sessionID uuid.UUID, expiration time.Time) {
 			Expiration: expiration,
 			SessionID:  sessionID,
 			UserID:     user.ID,
+			TenantID:   user.TenantID,
 		}
 
 		db.Create(&session)
 	}
+}
+
+func getAuthContextData(r *http.Request) (types.AuthContext, error) {
+	authContext := types.AuthContext{}
+	authContext, ok := r.Context().Value("authContext").(types.AuthContext)
+
+	if !ok {
+		log.Println("Getting auth context failed")
+		return authContext, errors.New("Getting auth context failed")
+	}
+	return authContext, nil
 }

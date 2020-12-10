@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/nocubicles/skillbase.io/src/models"
@@ -13,13 +14,15 @@ type HomePageData struct {
 }
 
 func RenderApp(w http.ResponseWriter, r *http.Request) {
-	userID := r.Context().Value("userID")
-	if userID != nil {
-		userID = userID.(uint)
+	authContext, err := getAuthContextData(r)
+
+	if err != nil {
+		fmt.Println(err)
 	}
+
 	user := models.User{}
 	db := utils.DbConnection()
-	result := db.First(&user, userID)
+	result := db.First(&user, authContext.UserID)
 	data := HomePageData{
 		Authenticated: false,
 		UserName:      "",

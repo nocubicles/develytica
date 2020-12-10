@@ -9,7 +9,8 @@ import (
 
 type Session struct {
 	gorm.Model
-	UserID uint
-	SessionID uuid.UUID
+	UserID     uint
+	SessionID  uuid.UUID
 	Expiration time.Time
+	TenantID   uint
 }

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+{{ template "head.html" . }}
+
+<body>
+    {{ template "header.html" . }}
+
+    <div class="container">
+        <div class="columns">
+            <div class="column is-3 ">
+                {{ template "side.html" }}
+            </div>
+            <div class="column is-9">
+                <h1 class="title is-3">These are the organizations that you have granted access to us</h1>
+				<div class="content">
+                <p>We can keep all the repos, issues and labels in sync from these organizations.</p>
+                <p>You can add more organizations if you want to.</p>
+					<ul type="1">
+						{{ range .Organizations}}
+							<li>{{.Login}}</li>
+						{{end}}
+					</ul>
+				</div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
