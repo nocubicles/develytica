@@ -5,9 +5,7 @@ import (
 )
 
 type Repo struct {
-	UserID           uint `gorm:"primaryKey; not null"`
-	TenantID         uint `gorm:"primaryKey; not null"`
-	RemoteOrgID      int64
+	RemoteOrgID      int64 `gorm:"primaryKey; not null"`
 	RemoteID         int64 `gorm:"primaryKey; not null"`
 	Name             string
 	FullName         string
@@ -28,5 +26,4 @@ type Repo struct {
 	Private          bool
 	HasIssues        bool
 	HasProjects      bool
-	TeamID           int64
 }

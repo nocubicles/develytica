@@ -71,7 +71,8 @@ func CheckIsUsedLoggedIn(next http.HandlerFunc) http.HandlerFunc {
 			}
 			next(w, r)
 		} else {
-			http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+
+			next(w, r)
 
 			return
 		}

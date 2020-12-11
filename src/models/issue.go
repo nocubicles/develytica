@@ -3,9 +3,8 @@ package models
 import "time"
 
 type Issue struct {
-	UserID            uint  `gorm:"primaryKey; not null"`
-	TenantID          uint  `gorm:"primaryKey; not null"`
 	RemoteID          int64 `gorm:"primaryKey; not null"`
+	RemoteRepoID      int64 `gorm:"primaryKey; not null"`
 	Number            int
 	State             string
 	Locked            bool

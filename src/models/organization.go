@@ -12,4 +12,5 @@ type Organization struct {
 	AvatarURL     string
 	RemoteID      int64 `gorm:"primaryKey; not null"`
 	Login         string
+	ManuallyAdded bool `gorm:"primaryKey"`
 }
