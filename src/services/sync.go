@@ -208,6 +208,10 @@ func SyncGithubData(userID uint, tenantID uint, syncName string, syncID uint) {
 			db.Where("remote_org_id = ?", userOrg.RemoteID).Find(&userRepos)
 
 			for _, userRepo := range userRepos {
+				if !shouldSyncRepo(userID, tenantID, userRepo.RemoteID) {
+					continue
+				}
+
 				repoTrackingResult := db.Where("user_id = ? AND tenant_id = ? AND repo_ID = ?", userID, tenantID, userRepo.RemoteID).Find(&repoTracking)
 				if repoTrackingResult.RowsAffected > 0 {
 					for {
@@ -239,6 +243,16 @@ func SyncGithubData(userID uint, tenantID uint, syncName string, syncID uint) {
 
 }
 
+func shouldSyncRepo(userID uint, tenantID uint, repoID int64) bool {
+	db := utils.DbConnection()
+	repoTracking := models.RepoTracking{}
+	result := db.Where("user_id = ? AND tenant_ID = ? and repo_ID = ?", userID, tenantID, repoID).First(&repoTracking)
+	if result.RowsAffected > 0 {
+		return true
+	}
+	return false
+}
+
 func syncLabelsFromIssue(userID uint, tenantID uint, issueID int64, RemoteIssueLabels []*github.Label) {
 	db := utils.DbConnection()
 
@@ -249,8 +263,9 @@ func syncLabelsFromIssue(userID uint, tenantID uint, issueID int64, RemoteIssueL
 		label.Description = remoteIssueLabel.GetDescription()
 		label.RemoteID = remoteIssueLabel.GetID()
 		label.Name = remoteIssueLabel.GetName()
-		label.RemoteIssueID = issueID
 		label.URL = remoteIssueLabel.GetURL()
+		label.UserID = userID
+		label.TenantID = tenantID
 		db.Clauses(clause.OnConflict{
 			UpdateAll: true,
 		}).Create(&label)
@@ -276,6 +291,8 @@ func syncUsersFromIssue(userID uint, tenantID uint, issueID int64, RemoteIssueUs
 		assignee.Login = RemoteIssueUser.GetLogin()
 		assignee.Name = RemoteIssueUser.GetName()
 		assignee.RemoteIssueID = issueID
+		assignee.UserID = userID
+		assignee.TenantID = tenantID
 		db.Clauses(clause.OnConflict{
 			UpdateAll: true,
 		}).Create(&assignee)

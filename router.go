@@ -19,8 +19,12 @@ func router() *mux.Router {
 
 	router.HandleFunc("/app", middleware.CheckIsUsedLoggedIn(routes.RenderApp)).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/organizations", middleware.CheckIsUsedLoggedIn(routes.Organization)).Methods(http.MethodGet, http.MethodPost, http.MethodOptions)
-	router.HandleFunc("/repositories", middleware.CheckIsUsedLoggedIn(routes.Repository)).Methods(http.MethodGet, http.MethodPost, http.MethodOptions)
-	router.HandleFunc("/repositories/tracking", middleware.CheckIsUsedLoggedIn(routes.RepositoryTrack)).Methods(http.MethodPut, http.MethodOptions)
+
+	router.HandleFunc("/repositories", middleware.CheckIsUsedLoggedIn(routes.RepoHandler)).Methods(http.MethodGet, http.MethodPost, http.MethodOptions)
+	router.HandleFunc("/repositories/tracking", middleware.CheckIsUsedLoggedIn(routes.RepoHandler)).Methods(http.MethodPut, http.MethodOptions)
+
+	router.HandleFunc("/labels", middleware.CheckIsUsedLoggedIn(routes.LabelHandler)).Methods(http.MethodGet, http.MethodPost, http.MethodOptions)
+	router.HandleFunc("/labels/tracking", middleware.CheckIsUsedLoggedIn(routes.LabelHandler)).Methods(http.MethodPut, http.MethodOptions)
 
 	router.HandleFunc("/sync", middleware.CheckIsUsedLoggedIn(routes.Sync)).Methods(http.MethodPost, http.MethodOptions)
 	router.Use(mux.CORSMethodMiddleware(router))
