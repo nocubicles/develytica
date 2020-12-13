@@ -185,7 +185,6 @@ func SyncGithubData(userID uint, tenantID uint, syncName string, syncID uint) {
 				repo.Size = githubRepo.GetSize()
 				repo.StargazersCount = githubRepo.GetStargazersCount()
 				repo.SubscribersCount = githubRepo.GetSubscribersCount()
-				repo.RemoteOrgID = githubRepo.Organization.GetID()
 				repo.WatchersCount = githubRepo.GetWatchersCount()
 				repo.UpdatedAt = githubRepo.GetUpdatedAt().Time
 
@@ -198,31 +197,36 @@ func SyncGithubData(userID uint, tenantID uint, syncName string, syncID uint) {
 		finishSyncHistory(syncHistory)
 	} else if syncName == "issue" {
 		syncHistory := initiateSyncHistory(userID, tenantID, syncID)
-		var allUserRepos []models.Repo
 		options := &github.IssueListByRepoOptions{ListOptions: github.ListOptions{PerPage: perPage}, State: "all"}
-		db.Where("user_id = ? AND tenant_id = ? ", userID, tenantID).Find(&allUserRepos)
+		userOrgs := []models.Organization{}
+		db.Where("user_id = ? AND tenant_id = ?", userID, tenantID).Find(&userOrgs)
 
-		for _, userRepo := range allUserRepos {
-			for {
-				repoOrg := models.Organization{}
-				db.Select("login").Where("user_id = ? AND tenant_id = ? AND remote_id = ?", userID, tenantID, userRepo.RemoteOrgID).Find(&repoOrg)
+		for _, userOrg := range userOrgs {
+			userRepos := []models.Repo{}
 
-				issues, response, err := githubClient.Issues.ListByRepo(ctx, repoOrg.Login, userRepo.Name, options)
+			db.Where("remote_org_id = ?", userOrg.RemoteID).Find(&userRepos)
 
-				if err != nil {
-					checkIfRateLimitErr(err)
-					checkIfAcceptedError(err)
-					fmt.Println(err)
+			for _, userRepo := range userRepos {
+				for {
+
+					issues, response, err := githubClient.Issues.ListByRepo(ctx, userOrg.Login, userRepo.Name, options)
+
+					if err != nil {
+						checkIfRateLimitErr(err)
+						checkIfAcceptedError(err)
+						fmt.Println(err)
+					}
+
+					go SyncGithubIssues(issues, userID, tenantID, userRepo.RemoteID)
+
+					if response.NextPage == 0 {
+						break
+					}
+
+					options.Page = response.NextPage
 				}
-
-				go SyncGithubIssues(issues, userID, tenantID, userRepo.RemoteID)
-
-				if response.NextPage == 0 {
-					break
-				}
-
-				options.Page = response.NextPage
 			}
+
 		}
 
 		finishSyncHistory(syncHistory)
@@ -326,8 +330,8 @@ func SyncGithubIssues(issues []*github.Issue, userID uint, tenantID uint, repoID
 		db.Clauses(clause.OnConflict{
 			UpdateAll: true,
 		}).Create(&issue)
-		go syncLabelsFromIssue(userID, tenantID, issue.RemoteID, githubIssue.Labels)
-		go syncUsersFromIssue(userID, tenantID, issue.RemoteID, githubIssue.Assignees)
+		syncLabelsFromIssue(userID, tenantID, issue.RemoteID, githubIssue.Labels)
+		syncUsersFromIssue(userID, tenantID, issue.RemoteID, githubIssue.Assignees)
 
 	}
 }

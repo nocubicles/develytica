@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+{{ template "head.html" . }}
+
+<body>
+    {{ template "header.html" . }}
+    <div class="container">
+        <div class="columns">
+            <div class="column is-3 ">
+                {{ template "side.html" }}
+            </div>
+            <div class="column is-9">
+                <h2 class="title is-2">These are the repositories that we know of</h2>
+                <div class="content">
+                    <p>You can select here which repositories you want to keep track of</p>
+                    {{range .ValidationErrors}}
+                    <p class="help is-danger">{{ .}}</p>
+                    {{ end }}
+
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Repo name</th>
+                                <th>Repo open issues count</th>
+                                <th>Repo Organization</th>
+                                <th>Track repo?</th>
+                        </thead>
+                        <tbody>
+                            {{ range .ReposData}}
+                            <tr>
+                                <th>{{.Name}}</th>
+                                <th>{{.OpenIssuesCount}}</th>
+                                <th>{{.OrgName}}</th>
+                                <th>{{.IsTracked}}</th>
+                            </tr>
+                            {{end}}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

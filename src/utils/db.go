@@ -48,6 +48,7 @@ func init() {
 		&models.Label{},
 		&models.IssueAssignee{},
 		&models.IssueLabel{},
+		&models.RepoTracking{},
 	)
 
 	if err != nil {

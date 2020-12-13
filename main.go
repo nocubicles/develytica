@@ -18,7 +18,6 @@ func init() {
 
 func main() {
 	db := utils.DbConnection()
-
 	sqlDB, err := db.DB()
 
 	if err != nil {
