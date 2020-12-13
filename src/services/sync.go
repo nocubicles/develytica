@@ -199,6 +199,7 @@ func SyncGithubData(userID uint, tenantID uint, syncName string, syncID uint) {
 		syncHistory := initiateSyncHistory(userID, tenantID, syncID)
 		options := &github.IssueListByRepoOptions{ListOptions: github.ListOptions{PerPage: perPage}, State: "all"}
 		userOrgs := []models.Organization{}
+		repoTracking := models.RepoTracking{}
 		db.Where("user_id = ? AND tenant_id = ?", userID, tenantID).Find(&userOrgs)
 
 		for _, userOrg := range userOrgs {
@@ -207,23 +208,25 @@ func SyncGithubData(userID uint, tenantID uint, syncName string, syncID uint) {
 			db.Where("remote_org_id = ?", userOrg.RemoteID).Find(&userRepos)
 
 			for _, userRepo := range userRepos {
-				for {
+				repoTrackingResult := db.Where("user_id = ? AND tenant_id = ? AND repo_ID = ?", userID, tenantID, userRepo.RemoteID).Find(&repoTracking)
+				if repoTrackingResult.RowsAffected > 0 {
+					for {
+						issues, response, err := githubClient.Issues.ListByRepo(ctx, userOrg.Login, userRepo.Name, options)
 
-					issues, response, err := githubClient.Issues.ListByRepo(ctx, userOrg.Login, userRepo.Name, options)
+						if err != nil {
+							checkIfRateLimitErr(err)
+							checkIfAcceptedError(err)
+							fmt.Println(err)
+						}
 
-					if err != nil {
-						checkIfRateLimitErr(err)
-						checkIfAcceptedError(err)
-						fmt.Println(err)
+						SyncGithubIssues(issues, userID, tenantID, userRepo.RemoteID)
+
+						if response.NextPage == 0 {
+							break
+						}
+
+						options.Page = response.NextPage
 					}
-
-					go SyncGithubIssues(issues, userID, tenantID, userRepo.RemoteID)
-
-					if response.NextPage == 0 {
-						break
-					}
-
-					options.Page = response.NextPage
 				}
 			}
 

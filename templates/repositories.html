@@ -16,26 +16,37 @@
                     {{range .ValidationErrors}}
                     <p class="help is-danger">{{ .}}</p>
                     {{ end }}
-
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Repo name</th>
-                                <th>Repo open issues count</th>
-                                <th>Repo Organization</th>
-                                <th>Track repo?</th>
-                        </thead>
-                        <tbody>
-                            {{ range .ReposData}}
-                            <tr>
-                                <th>{{.Name}}</th>
-                                <th>{{.OpenIssuesCount}}</th>
-                                <th>{{.OrgName}}</th>
-                                <th>{{.IsTracked}}</th>
-                            </tr>
-                            {{end}}
-                        </tbody>
-                    </table>
+                </div>
+                <div class="table-container">
+                    <div class="control" hx-include="#reposform" hx-target="#repostable">
+                        <button class="button is-link" hx-put="/repositories/tracking">Update tracking</button>
+                    </div>
+                    <form id="reposform">
+                        <table class="table is-striped is-fullwidth">
+                            <thead>
+                                <tr>
+                                    <th>Repo Organization</th>
+                                    <th>Repo name</th>
+                                    <th>Repo open issues count</th>
+                                    <th>Track repo?</th>
+                                </tr>
+                            </thead>
+                            <tbody id="repostable">
+                                {{ range .ReposData}}
+                                <tr>
+                                    <td>{{.Login}}</td>
+                                    <td>{{.Name}}</td>
+                                    <td>{{.OpenIssuesCount}}</td>
+                                    <td>
+                                        <input type="checkbox" name="repoTracked" value={{ .RemoteID}} {{ if .IsTracked}}checked{{end}}/></td>
+                                </tr>
+                                {{end}}
+                            </tbody>
+                        </table>
+                    </form>
+                    <div class="control" hx-include="#reposform" hx-target="#repostable">
+                        <button class="button is-link" hx-put="/repositories/tracking">Update tracking</button>
+                    </div>
                 </div>
             </div>
         </div>

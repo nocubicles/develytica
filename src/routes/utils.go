@@ -62,6 +62,17 @@ func getAuthContextData(r *http.Request) (types.AuthContext, error) {
 	return authContext, nil
 }
 
+func convertStringToInt64(value string) int64 {
+
+	u64, err := strconv.ParseInt(value, 10, 64)
+	if err != nil {
+		fmt.Println(err)
+		return 0
+	}
+
+	return int64(u64)
+}
+
 func convertStringToUint(value string) uint {
 
 	u64, err := strconv.ParseUint(value, 10, 64)
