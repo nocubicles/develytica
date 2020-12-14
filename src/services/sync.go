@@ -54,6 +54,7 @@ func CreateSyncJobs(userID uint, tenantID uint) {
 		sync.TenantID = tenantID
 		sync.Name = neededSync.Name
 		sync.Priority = neededSync.Priority
+		sync.InProgress = false
 		db.Create(&sync)
 	}
 }
@@ -66,7 +67,12 @@ func DoImmidiateFullSyncByTenantID(tenantID uint) {
 
 	if result.RowsAffected > 0 {
 		for _, sync := range syncs {
+			if isSyncInProgress(sync) {
+				continue
+			}
+			updateSyncInProgress(&sync)
 			SyncGithubData(sync.TenantID, sync.Name, sync.ID)
+			updateSyncInProgress(&sync)
 		}
 	}
 }
@@ -82,7 +88,12 @@ func DoFullSyncAllUsersPeriodic() {
 	//all syncs that needs new sync
 	if result.RowsAffected > 0 {
 		for _, sync := range syncs {
+			if isSyncInProgress(sync) {
+				continue
+			}
+			updateSyncInProgress(&sync)
 			SyncGithubData(sync.TenantID, sync.Name, sync.ID)
+			updateSyncInProgress(&sync)
 		}
 	}
 }
@@ -317,6 +328,20 @@ func finishSyncHistory(syncHistory *models.SyncHistory) {
 	syncHistory.Success = true
 	syncHistory.SyncEnd = time.Now()
 	db.Clauses(clause.OnConflict{UpdateAll: true}).Create(&syncHistory)
+}
+
+func isSyncInProgress(sync models.Sync) bool {
+	if sync.InProgress {
+		return true
+	}
+
+	return false
+}
+
+func updateSyncInProgress(sync *models.Sync) {
+	db := utils.DbConnection()
+	sync.InProgress = !sync.InProgress
+	db.Save(&sync)
 }
 
 func SyncGithubIssues(issues []*github.Issue, tenantID uint, repoID int64) {

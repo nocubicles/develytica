@@ -13,4 +13,5 @@ type Sync struct {
 	LastRunSuccess bool   `gorm:"default:false"`
 	LastRun        time.Time
 	Priority       int `gorm:"index"`
+	InProgress     bool
 }

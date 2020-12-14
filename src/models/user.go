@@ -7,14 +7,12 @@ import (
 
 type User struct {
 	gorm.Model
-	Email         string `gorm:"index"`
-	Ads           []Ad
-	Sessions      []Session
-	SignInToken   uuid.UUID `gorm:"index"`
-	UserClaim     UserClaim
-	TenantID      uint `gorm:"index"`
-	Syncs         []Sync
-	SyncHistories []SyncHistory
+	Email       string `gorm:"index"`
+	Ads         []Ad
+	Sessions    []Session
+	SignInToken uuid.UUID `gorm:"index"`
+	UserClaim   UserClaim
+	TenantID    uint `gorm:"index"`
 }
 
 func (u *User) BeforeSave(tx *gorm.DB) (err error) {

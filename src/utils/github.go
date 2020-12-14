@@ -8,8 +8,8 @@ import (
 	"golang.org/x/oauth2"
 )
 
-//GetGithubClientByUserAndTenant returns client to use for accessing github API
-func GetGithubClientByUserAndTenant(tenantID uint) (*github.Client, context.Context) {
+//GetGithubClientByTenant returns client to use for accessing github API
+func GetGithubClientByTenant(tenantID uint) (*github.Client, context.Context) {
 	userClaim := models.UserClaim{}
 	db.Where("tenant_id = ?", tenantID).Find(&userClaim)
 
