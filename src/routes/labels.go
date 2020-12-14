@@ -59,7 +59,7 @@ func LabelHandler(w http.ResponseWriter, r *http.Request) {
 			if key == "labelTracked" && len(values) > 0 {
 				label := models.Label{}
 				valuesInt64 := []int64{}
-				db.Model(label).Where("user_id = ? AND tenant_id = ?", user.ID, user.TenantID).Update("tracked", false)
+				db.Model(label).Where("tenant_id = ?", user.TenantID).Update("tracked", false)
 
 				for i := range values {
 					valueInt64 := convertStringToInt64(values[i])
@@ -68,7 +68,7 @@ func LabelHandler(w http.ResponseWriter, r *http.Request) {
 
 				db.Table("labels").Where("remote_id IN ?", valuesInt64).Updates(map[string]interface{}{"tracked": true})
 
-				go services.DoImmidiateFullSyncByUserTenantID(user.ID, user.TenantID)
+				go services.DoImmidiateFullSyncByTenantID(user.TenantID)
 			}
 		}
 		http.Redirect(w, r, "/labels", http.StatusTemporaryRedirect)
@@ -79,7 +79,7 @@ func LabelHandler(w http.ResponseWriter, r *http.Request) {
 
 		db.Model(&models.Label{}).
 			Select("name, description, color, tracked, remote_id").
-			Where("user_id = ? AND tenant_id = ?", user.ID, user.TenantID).
+			Where("tenant_id = ?", user.TenantID).
 			Order("name desc").
 			Scan(&result)
 		data.LabelsData = result

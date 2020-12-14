@@ -9,9 +9,9 @@ import (
 )
 
 //GetGithubClientByUserAndTenant returns client to use for accessing github API
-func GetGithubClientByUserAndTenant(userID uint, tenantID uint) (*github.Client, context.Context) {
+func GetGithubClientByUserAndTenant(tenantID uint) (*github.Client, context.Context) {
 	userClaim := models.UserClaim{}
-	db.Where("tenant_id = ? AND user_id = ?", tenantID, userID).Find(&userClaim)
+	db.Where("tenant_id = ?", tenantID).Find(&userClaim)
 
 	ctx := context.Background()
 	ts := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: userClaim.AccessToken})

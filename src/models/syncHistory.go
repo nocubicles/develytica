@@ -8,7 +8,6 @@ import (
 
 type SyncHistory struct {
 	gorm.Model
-	UserID    uint `gorm:"index"`
 	SyncID    uint `gorm:"index"`
 	Success   bool
 	TenantID  uint `gorm:"index"`

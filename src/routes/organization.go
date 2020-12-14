@@ -49,7 +49,7 @@ func Organization(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		githubClient, ctx := utils.GetGithubClientByUserAndTenant(user.ID, user.TenantID)
+		githubClient, ctx := utils.GetGithubClientByTenant(user.TenantID)
 		githubOrg, _, err := githubClient.Organizations.Get(ctx, githubOrgName)
 
 		if err != nil {
@@ -80,8 +80,8 @@ func Organization(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if len(githubOrg.GetLogin()) > 0 {
-			services.SyncGithubOrganization(githubOrg, user.ID, user.TenantID, true)
-			orgResult := db.Where("user_id = ? AND tenant_ID = ?", user.ID, user.TenantID).Find(&organizations)
+			services.SyncGithubOrganization(githubOrg, user.TenantID, true)
+			orgResult := db.Where("tenant_ID = ?", user.TenantID).Find(&organizations)
 
 			if orgResult.RowsAffected > 0 {
 				data.Organizations = organizations
@@ -94,7 +94,7 @@ func Organization(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == http.MethodGet {
 
-		orgResult := db.Where("user_id = ? AND tenant_ID = ?", user.ID, user.TenantID).Find(&organizations)
+		orgResult := db.Where("tenant_ID = ?", user.TenantID).Find(&organizations)
 
 		if orgResult.RowsAffected > 0 {
 			data.Organizations = organizations

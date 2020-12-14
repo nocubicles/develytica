@@ -7,6 +7,5 @@ type Assignee struct {
 	Name          string
 	AvatarURL     string
 	Location      string
-	UserID        uint `gorm:"primaryKey; not null"`
 	TenantID      uint `gorm:"primaryKey; not null"`
 }

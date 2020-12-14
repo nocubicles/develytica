@@ -60,17 +60,16 @@ func RepoHandler(w http.ResponseWriter, r *http.Request) {
 				repoTracking := models.RepoTracking{}
 				reposTrackings := []models.RepoTracking{}
 
-				db.Where("user_id = ? AND tenant_id = ?", user.ID, user.TenantID).Delete(&repoTracking)
+				db.Where("tenant_id = ?", user.TenantID).Delete(&repoTracking)
 
 				for i := range values {
 					repoTracking.RepoID = convertStringToInt64(values[i])
-					repoTracking.UserID = user.ID
 					repoTracking.TenantID = user.TenantID
 					repoTracking.IsTracked = true
 					reposTrackings = append(reposTrackings, repoTracking)
 				}
 				db.Create(&reposTrackings)
-				go services.DoImmidiateFullSyncByUserTenantID(user.ID, user.TenantID)
+				go services.DoImmidiateFullSyncByTenantID(user.TenantID)
 			}
 		}
 		http.Redirect(w, r, "/repositories", http.StatusTemporaryRedirect)
@@ -93,11 +92,11 @@ func getReposData(userID uint, tenantID uint) (reposData []RepoData) {
 		Select("organizations.login, repos.name as reponame, repos.open_issues_count, repo_trackings.is_tracked, repos.remote_id").
 		Joins(`
 				LEFT JOIN repos on organizations.remote_id = repos.remote_org_id 
-				LEFT JOIN repo_trackings ON organizations.user_id = repo_trackings.user_id 
+				LEFT JOIN repo_trackings ON organizations.tenant_id = repo_trackings.tenant_id 
 				AND organizations.tenant_id = repo_trackings.tenant_id 
 				AND repos.remote_id = repo_trackings.repo_id
 				`).
-		Where("organizations.user_id = ? AND organizations.tenant_id = ?", userID, tenantID).
+		Where("organizations.tenant_id = ?", tenantID).
 		Order("organizations.login desc, reponame desc").
 		Scan(&result)
 	return result

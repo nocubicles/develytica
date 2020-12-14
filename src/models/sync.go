@@ -9,7 +9,6 @@ import (
 type Sync struct {
 	gorm.Model
 	TenantID       uint   `gorm:"primaryKey"`
-	UserID         uint   `gorm:"primaryKey"`
 	Name           string `gorm:"primaryKey"`
 	LastRunSuccess bool   `gorm:"default:false"`
 	LastRun        time.Time

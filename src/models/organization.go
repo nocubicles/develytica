@@ -1,7 +1,6 @@
 package models
 
 type Organization struct {
-	UserID        uint `gorm:"primaryKey; not null"`
 	TenantID      uint `gorm:"primaryKey; not null"`
 	Name          string
 	Collaborators int

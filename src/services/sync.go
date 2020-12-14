@@ -30,8 +30,8 @@ var neededSyncs = []neededSync{
 	},
 }
 
-//UpdateSyncJobs ensures that user has syncs enabled
-func UpdateSyncJobs(userID uint, tenantID uint) {
+//UpdateSyncJobs ensures that tenant has syncs enabled
+func UpdateSyncJobs(tenantID uint) {
 	db := utils.DbConnection()
 
 	for _, neededSync := range neededSyncs {
@@ -39,7 +39,6 @@ func UpdateSyncJobs(userID uint, tenantID uint) {
 		sync.TenantID = tenantID
 		sync.Name = neededSync.Name
 		sync.Priority = neededSync.Priority
-		sync.UserID = userID
 		db.FirstOrCreate(&sync, models.Sync{Name: neededSync.Name})
 
 	}
@@ -55,20 +54,19 @@ func CreateSyncJobs(userID uint, tenantID uint) {
 		sync.TenantID = tenantID
 		sync.Name = neededSync.Name
 		sync.Priority = neededSync.Priority
-		sync.UserID = userID
 		db.Create(&sync)
 	}
 }
 
-func DoImmidiateFullSyncByUserTenantID(userID uint, tenantID uint) {
+func DoImmidiateFullSyncByTenantID(tenantID uint) {
 	syncs := []models.Sync{}
 	db := utils.DbConnection()
 
-	result := db.Order("priority asc").Where("user_id = ? AND tenant_id = ?", userID, tenantID).Find(&syncs)
+	result := db.Order("priority asc").Where("tenant_id = ?", tenantID).Find(&syncs)
 
 	if result.RowsAffected > 0 {
 		for _, sync := range syncs {
-			SyncGithubData(sync.UserID, sync.TenantID, sync.Name, sync.ID)
+			SyncGithubData(sync.TenantID, sync.Name, sync.ID)
 		}
 	}
 }
@@ -84,7 +82,7 @@ func DoFullSyncAllUsersPeriodic() {
 	//all syncs that needs new sync
 	if result.RowsAffected > 0 {
 		for _, sync := range syncs {
-			SyncGithubData(sync.UserID, sync.TenantID, sync.Name, sync.ID)
+			SyncGithubData(sync.TenantID, sync.Name, sync.ID)
 		}
 	}
 }
@@ -101,16 +99,16 @@ func checkIfAcceptedError(err error) {
 	}
 }
 
-//SyncGithubData syncs user/tenant data from github
-func SyncGithubData(userID uint, tenantID uint, syncName string, syncID uint) {
+//SyncGithubData syncs tenant data from github
+func SyncGithubData(tenantID uint, syncName string, syncID uint) {
 	start := time.Now()
 	perPage := 100
 	db := utils.DbConnection()
 
-	githubClient, ctx := utils.GetGithubClientByUserAndTenant(userID, tenantID)
+	githubClient, ctx := utils.GetGithubClientByTenant(tenantID)
 
 	if syncName == "organization" {
-		syncHistory := initiateSyncHistory(userID, tenantID, syncID)
+		syncHistory := initiateSyncHistory(tenantID, syncID)
 
 		var allOrgs []*github.Organization
 		options := &github.ListOptions{
@@ -133,18 +131,18 @@ func SyncGithubData(userID uint, tenantID uint, syncName string, syncID uint) {
 		}
 
 		for i := range allOrgs {
-			SyncGithubOrganization(allOrgs[i], userID, tenantID, false)
+			SyncGithubOrganization(allOrgs[i], tenantID, false)
 
 		}
 		finishSyncHistory(syncHistory)
 
 	} else if syncName == "repo" {
-		syncHistory := initiateSyncHistory(userID, tenantID, syncID)
-		var allUserOrgs []models.Organization
+		syncHistory := initiateSyncHistory(tenantID, syncID)
+		var allTenantOrgs []models.Organization
 		options := &github.RepositoryListByOrgOptions{ListOptions: github.ListOptions{PerPage: perPage}}
-		db.Where("user_id = ? AND tenant_id = ? ", userID, tenantID).Find(&allUserOrgs)
+		db.Where("tenant_id = ? ", tenantID).Find(&allTenantOrgs)
 
-		for _, userOrg := range allUserOrgs {
+		for _, userOrg := range allTenantOrgs {
 			var allRepos []*github.Repository
 
 			for {
@@ -196,26 +194,26 @@ func SyncGithubData(userID uint, tenantID uint, syncName string, syncID uint) {
 
 		finishSyncHistory(syncHistory)
 	} else if syncName == "issue" {
-		syncHistory := initiateSyncHistory(userID, tenantID, syncID)
+		syncHistory := initiateSyncHistory(tenantID, syncID)
 		options := &github.IssueListByRepoOptions{ListOptions: github.ListOptions{PerPage: perPage}, State: "all"}
-		userOrgs := []models.Organization{}
+		tenantOrgs := []models.Organization{}
 		repoTracking := models.RepoTracking{}
-		db.Where("user_id = ? AND tenant_id = ?", userID, tenantID).Find(&userOrgs)
+		db.Where("tenant_id = ?", tenantID).Find(&tenantOrgs)
 
-		for _, userOrg := range userOrgs {
-			userRepos := []models.Repo{}
+		for _, tenantOrg := range tenantOrgs {
+			tenantRepos := []models.Repo{}
 
-			db.Where("remote_org_id = ?", userOrg.RemoteID).Find(&userRepos)
+			db.Where("remote_org_id = ?", tenantOrg.RemoteID).Find(&tenantRepos)
 
-			for _, userRepo := range userRepos {
-				if !shouldSyncRepo(userID, tenantID, userRepo.RemoteID) {
+			for _, tenantRepo := range tenantRepos {
+				if !shouldSyncRepo(tenantID, tenantRepo.RemoteID) {
 					continue
 				}
 
-				repoTrackingResult := db.Where("user_id = ? AND tenant_id = ? AND repo_ID = ?", userID, tenantID, userRepo.RemoteID).Find(&repoTracking)
+				repoTrackingResult := db.Where("tenant_id = ? AND repo_ID = ?", tenantID, tenantRepo.RemoteID).Find(&repoTracking)
 				if repoTrackingResult.RowsAffected > 0 {
 					for {
-						issues, response, err := githubClient.Issues.ListByRepo(ctx, userOrg.Login, userRepo.Name, options)
+						issues, response, err := githubClient.Issues.ListByRepo(ctx, tenantOrg.Login, tenantRepo.Name, options)
 
 						if err != nil {
 							checkIfRateLimitErr(err)
@@ -223,7 +221,7 @@ func SyncGithubData(userID uint, tenantID uint, syncName string, syncID uint) {
 							fmt.Println(err)
 						}
 
-						SyncGithubIssues(issues, userID, tenantID, userRepo.RemoteID)
+						SyncGithubIssues(issues, tenantID, tenantRepo.RemoteID)
 
 						if response.NextPage == 0 {
 							break
@@ -243,17 +241,17 @@ func SyncGithubData(userID uint, tenantID uint, syncName string, syncID uint) {
 
 }
 
-func shouldSyncRepo(userID uint, tenantID uint, repoID int64) bool {
+func shouldSyncRepo(tenantID uint, repoID int64) bool {
 	db := utils.DbConnection()
 	repoTracking := models.RepoTracking{}
-	result := db.Where("user_id = ? AND tenant_ID = ? and repo_ID = ?", userID, tenantID, repoID).First(&repoTracking)
+	result := db.Where("tenant_ID = ? and repo_ID = ?", tenantID, repoID).First(&repoTracking)
 	if result.RowsAffected > 0 {
 		return true
 	}
 	return false
 }
 
-func syncLabelsFromIssue(userID uint, tenantID uint, issueID int64, RemoteIssueLabels []*github.Label) {
+func syncLabelsFromIssue(tenantID uint, issueID int64, RemoteIssueLabels []*github.Label) {
 	db := utils.DbConnection()
 
 	for i := range RemoteIssueLabels {
@@ -264,7 +262,6 @@ func syncLabelsFromIssue(userID uint, tenantID uint, issueID int64, RemoteIssueL
 		label.RemoteID = remoteIssueLabel.GetID()
 		label.Name = remoteIssueLabel.GetName()
 		label.URL = remoteIssueLabel.GetURL()
-		label.UserID = userID
 		label.TenantID = tenantID
 		db.Clauses(clause.OnConflict{
 			UpdateAll: true,
@@ -273,13 +270,12 @@ func syncLabelsFromIssue(userID uint, tenantID uint, issueID int64, RemoteIssueL
 		issueLabel := models.IssueLabel{}
 		issueLabel.IssueID = issueID
 		issueLabel.TenantID = tenantID
-		issueLabel.UserID = userID
 		db.FirstOrCreate(&issueLabel)
 	}
 
 }
 
-func syncUsersFromIssue(userID uint, tenantID uint, issueID int64, RemoteIssueUsers []*github.User) {
+func syncUsersFromIssue(tenantID uint, issueID int64, RemoteIssueUsers []*github.User) {
 	db := utils.DbConnection()
 
 	for i := range RemoteIssueUsers {
@@ -291,26 +287,23 @@ func syncUsersFromIssue(userID uint, tenantID uint, issueID int64, RemoteIssueUs
 		assignee.Login = RemoteIssueUser.GetLogin()
 		assignee.Name = RemoteIssueUser.GetName()
 		assignee.RemoteIssueID = issueID
-		assignee.UserID = userID
 		assignee.TenantID = tenantID
 		db.Clauses(clause.OnConflict{
 			UpdateAll: true,
 		}).Create(&assignee)
 
-		issueUser := models.IssueAssignee{}
-		issueUser.AssigneeID = RemoteIssueUser.GetID()
-		issueUser.IssueID = issueID
-		issueUser.TenantID = tenantID
-		issueUser.UserID = userID
-		db.FirstOrCreate(&issueUser)
+		tenantUser := models.IssueAssignee{}
+		tenantUser.AssigneeID = RemoteIssueUser.GetID()
+		tenantUser.IssueID = issueID
+		tenantUser.TenantID = tenantID
+		db.FirstOrCreate(&tenantUser)
 	}
 
 }
 
-func initiateSyncHistory(userID uint, tenantID uint, syncID uint) (syncHistoryID *models.SyncHistory) {
+func initiateSyncHistory(tenantID uint, syncID uint) (syncHistoryID *models.SyncHistory) {
 	db := utils.DbConnection()
 	syncHistory := models.SyncHistory{}
-	syncHistory.UserID = userID
 	syncHistory.TenantID = tenantID
 	syncHistory.Success = false
 	syncHistory.SyncStart = time.Now()
@@ -326,7 +319,7 @@ func finishSyncHistory(syncHistory *models.SyncHistory) {
 	db.Clauses(clause.OnConflict{UpdateAll: true}).Create(&syncHistory)
 }
 
-func SyncGithubIssues(issues []*github.Issue, userID uint, tenantID uint, repoID int64) {
+func SyncGithubIssues(issues []*github.Issue, tenantID uint, repoID int64) {
 	db := utils.DbConnection()
 	for i := range issues {
 		issue := models.Issue{}
@@ -350,14 +343,14 @@ func SyncGithubIssues(issues []*github.Issue, userID uint, tenantID uint, repoID
 		db.Clauses(clause.OnConflict{
 			UpdateAll: true,
 		}).Create(&issue)
-		syncLabelsFromIssue(userID, tenantID, issue.RemoteID, githubIssue.Labels)
-		syncUsersFromIssue(userID, tenantID, issue.RemoteID, githubIssue.Assignees)
+		syncLabelsFromIssue(tenantID, issue.RemoteID, githubIssue.Labels)
+		syncUsersFromIssue(tenantID, issue.RemoteID, githubIssue.Assignees)
 
 	}
 }
 
 //SyncGithubOrganization syncs github organization to db
-func SyncGithubOrganization(githubOrg *github.Organization, userID uint, tenantID uint, manuallyAdded bool) {
+func SyncGithubOrganization(githubOrg *github.Organization, tenantID uint, manuallyAdded bool) {
 	db := utils.DbConnection()
 	org := models.Organization{}
 	org.AvatarURL = githubOrg.GetAvatarURL()
@@ -368,7 +361,6 @@ func SyncGithubOrganization(githubOrg *github.Organization, userID uint, tenantI
 	org.RemoteID = githubOrg.GetID()
 	org.Type = githubOrg.GetType()
 	org.Followers = githubOrg.GetFollowers()
-	org.UserID = userID
 	org.TenantID = tenantID
 	org.ManuallyAdded = manuallyAdded
 
