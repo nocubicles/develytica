@@ -16,10 +16,10 @@
                     <div class="hero-body">
                         <div class="container">
                             <h1 class="title">
-                                Hello, Admin.
+                                Hello,
                             </h1>
                             <h2 class="subtitle">
-                                I hope you are having a great day!
+                                Here are some quick findings
                             </h2>
                         </div>
                     </div>
@@ -28,26 +28,26 @@
                     <div class="tile is-ancestor has-text-centered">
                         <div class="tile is-parent">
                             <article class="tile is-child box">
-                                <p class="title">439k</p>
-                                <p class="subtitle">Users</p>
+                                <p class="title">{{.UsersCount}}</p>
+                                <p class="subtitle">Github org members</p>
                             </article>
                         </div>
                         <div class="tile is-parent">
                             <article class="tile is-child box">
-                                <p class="title">59k</p>
-                                <p class="subtitle">Products</p>
+                                <p class="title">{{.OrganizationsCount}}</p>
+                                <p class="subtitle">Github organizations</p>
                             </article>
                         </div>
                         <div class="tile is-parent">
                             <article class="tile is-child box">
-                                <p class="title">3.4k</p>
-                                <p class="subtitle">Open Orders</p>
+                                <p class="title">{{.ReposCount}}</p>
+                                <p class="subtitle">Github repos</p>
                             </article>
                         </div>
                         <div class="tile is-parent">
                             <article class="tile is-child box">
-                                <p class="title">19</p>
-                                <p class="subtitle">Exceptions</p>
+                                <p class="title">{{.LabelsCount}}</p>
+                                <p class="subtitle">Labels to use as tracking point</p>
                             </article>
                         </div>
                     </div>

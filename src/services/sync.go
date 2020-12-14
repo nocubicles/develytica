@@ -45,7 +45,7 @@ func UpdateSyncJobs(tenantID uint) {
 }
 
 //CreateSyncJobs creates needed syncs for the user
-func CreateSyncJobs(userID uint, tenantID uint) {
+func CreateSyncJobs(tenantID uint) {
 
 	db := utils.DbConnection()
 
@@ -208,7 +208,6 @@ func SyncGithubData(tenantID uint, syncName string, syncID uint) {
 		syncHistory := initiateSyncHistory(tenantID, syncID)
 		options := &github.IssueListByRepoOptions{ListOptions: github.ListOptions{PerPage: perPage}, State: "all"}
 		tenantOrgs := []models.Organization{}
-		repoTracking := models.RepoTracking{}
 		db.Where("tenant_id = ?", tenantID).Find(&tenantOrgs)
 
 		for _, tenantOrg := range tenantOrgs {
@@ -220,7 +219,7 @@ func SyncGithubData(tenantID uint, syncName string, syncID uint) {
 				if !shouldSyncRepo(tenantID, tenantRepo.RemoteID) {
 					continue
 				}
-
+				repoTracking := models.RepoTracking{}
 				repoTrackingResult := db.Where("tenant_id = ? AND repo_ID = ?", tenantID, tenantRepo.RemoteID).Find(&repoTracking)
 				if repoTrackingResult.RowsAffected > 0 {
 					for {

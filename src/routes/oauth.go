@@ -96,10 +96,8 @@ func setupUserFromGithub(code string) (models.User, error) {
 
 		result = db.Model(&userClaim).Where("user_id = ? AND provider = ? AND tenant_id = ?", user.ID, provider, user.TenantID).Update("access_token", token.AccessToken)
 		if result.RowsAffected > 0 {
-			start := time.Now()
 			services.UpdateSyncJobs(user.TenantID)
 			go services.DoImmidiateFullSyncByTenantID(user.TenantID)
-			fmt.Printf("Duration: %v", time.Since(start).Milliseconds())
 		}
 	} else {
 		//new user, never seen before
@@ -113,7 +111,7 @@ func setupUserFromGithub(code string) (models.User, error) {
 		userClaim.TenantID = user.TenantID
 
 		db.Create(&userClaim)
-		services.CreateSyncJobs(user.ID, user.TenantID)
+		services.CreateSyncJobs(user.TenantID)
 		go services.DoImmidiateFullSyncByTenantID(user.TenantID)
 	}
 	return user, nil

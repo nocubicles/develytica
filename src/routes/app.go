@@ -9,8 +9,12 @@ import (
 )
 
 type HomePageData struct {
-	Authenticated bool
-	UserName      string
+	Authenticated      bool
+	UserName           string
+	OrganizationsCount int64
+	ReposCount         int64
+	LabelsCount        int64
+	UsersCount         int64
 }
 
 func RenderApp(w http.ResponseWriter, r *http.Request) {
@@ -31,6 +35,19 @@ func RenderApp(w http.ResponseWriter, r *http.Request) {
 		data.Authenticated = true
 		data.UserName = user.Email
 	}
+	var OrgCount int64
+	db.Model(&models.Organization{}).Count(&OrgCount)
+	var ReposCount int64
+	db.Model(&models.Repo{}).Count(&ReposCount)
+	var LabelsCount int64
+	db.Model(&models.Label{}).Count(&LabelsCount)
+	var UsersCount int64
+	db.Model(&models.Assignee{}).Count(&UsersCount)
+
+	data.LabelsCount = LabelsCount
+	data.ReposCount = ReposCount
+	data.OrganizationsCount = OrgCount
+	data.UsersCount = UsersCount
 
 	utils.Render(w, "app.html", data)
 }

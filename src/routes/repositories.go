@@ -88,16 +88,13 @@ func getReposData(userID uint, tenantID uint) (reposData []RepoData) {
 
 	result := []RepoData{}
 
-	db.Model(&models.Organization{}).
-		Select("organizations.login, repos.name as reponame, repos.open_issues_count, repo_trackings.is_tracked, repos.remote_id").
-		Joins(`
-				LEFT JOIN repos on organizations.remote_id = repos.remote_org_id 
-				LEFT JOIN repo_trackings ON organizations.tenant_id = repo_trackings.tenant_id 
-				AND organizations.tenant_id = repo_trackings.tenant_id 
-				AND repos.remote_id = repo_trackings.repo_id
-				`).
-		Where("organizations.tenant_id = ?", tenantID).
-		Order("organizations.login desc, reponame desc").
+	db.Raw(`SELECT organizations.login, repos.name, repos.open_issues_count, repo_trackings.is_tracked, repos.remote_id FROM "organizations" 
+		LEFT JOIN repos on organizations.remote_id = repos.remote_org_id 
+		LEFT JOIN repo_trackings ON organizations.tenant_id = repo_trackings.tenant_id 
+		AND organizations.tenant_id = repo_trackings.tenant_id 
+		AND repos.remote_id = repo_trackings.repo_id
+		WHERE organizations.tenant_id = ?
+		ORDER BY organizations.login desc`, tenantID).
 		Scan(&result)
 	return result
 }
