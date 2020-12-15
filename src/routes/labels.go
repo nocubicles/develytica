@@ -10,11 +10,8 @@ import (
 )
 
 type LabelData struct {
-	Name        string
-	Description string
-	Color       string
-	Tracked     bool
-	RemoteID    int64
+	Name    string
+	Tracked bool
 }
 
 type LabelPageData struct {
@@ -58,15 +55,9 @@ func LabelHandler(w http.ResponseWriter, r *http.Request) {
 
 			if key == "labelTracked" && len(values) > 0 {
 				label := models.Label{}
-				valuesInt64 := []int64{}
 				db.Model(label).Where("tenant_id = ?", user.TenantID).Update("tracked", false)
 
-				for i := range values {
-					valueInt64 := convertStringToInt64(values[i])
-					valuesInt64 = append(valuesInt64, valueInt64)
-				}
-
-				db.Table("labels").Where("remote_id IN ?", valuesInt64).Updates(map[string]interface{}{"tracked": true})
+				db.Table("labels").Where("name IN ?", values).Updates(map[string]interface{}{"tracked": true})
 
 				go services.DoImmidiateFullSyncByTenantID(user.TenantID)
 			}
@@ -78,7 +69,7 @@ func LabelHandler(w http.ResponseWriter, r *http.Request) {
 		result := []LabelData{}
 
 		db.Model(&models.Label{}).
-			Select("name, description, color, tracked, remote_id").
+			Select("labels.name, labels.tracked").
 			Where("tenant_id = ?", user.TenantID).
 			Order("name desc").
 			Scan(&result)

@@ -26,6 +26,8 @@ func router() *mux.Router {
 	router.HandleFunc("/labels", middleware.CheckIsUsedLoggedIn(routes.LabelHandler)).Methods(http.MethodGet, http.MethodPost, http.MethodOptions)
 	router.HandleFunc("/labels/tracking", middleware.CheckIsUsedLoggedIn(routes.LabelHandler)).Methods(http.MethodPut, http.MethodOptions)
 
+	router.Handle("/team", middleware.CheckIsUsedLoggedIn(routes.TeamHandler)).Methods(http.MethodGet, http.MethodOptions)
+
 	router.HandleFunc("/sync", middleware.CheckIsUsedLoggedIn(routes.Sync)).Methods(http.MethodPost, http.MethodOptions)
 	router.Use(mux.CORSMethodMiddleware(router))
 	router.PathPrefix("/assets/").Handler(http.StripPrefix("/assets/", http.FileServer(http.Dir("assets/"))))

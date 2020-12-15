@@ -27,17 +27,14 @@
                             <thead>
                                 <tr>
                                     <th>Label name</th>
-                                    <th>Label Description</th>
                                     <th>Track label?</th>
                                 </tr>
                             </thead>
                             <tbody id="labelstable">
                                 {{ range .LabelsData}}
                                 <tr>
-                                    <td style="background-color: #{{.Color}}">{{.Name}}</td>
-                                    <td>{{.Description}}</td>
-                                    <td>
-                                        <input type="checkbox" name="labelTracked" value={{ .RemoteID}} {{ if .Tracked}}checked{{end}}/></td>
+                                    <td>{{.Name}}</td>
+                                    <td><input type="checkbox" name="labelTracked" value={{ .Name}} {{ if .Tracked}}checked{{end}}/></td>
                                 </tr>
                                 {{end}}
                             </tbody>

@@ -267,20 +267,11 @@ func syncLabelsFromIssue(tenantID uint, issueID int64, RemoteIssueLabels []*gith
 	for i := range RemoteIssueLabels {
 		remoteIssueLabel := RemoteIssueLabels[i]
 		label := models.Label{}
-		label.Color = remoteIssueLabel.GetColor()
-		label.Description = remoteIssueLabel.GetDescription()
-		label.RemoteID = remoteIssueLabel.GetID()
 		label.Name = remoteIssueLabel.GetName()
-		label.URL = remoteIssueLabel.GetURL()
 		label.TenantID = tenantID
 		db.Clauses(clause.OnConflict{
 			UpdateAll: true,
 		}).Create(&label)
-
-		issueLabel := models.IssueLabel{}
-		issueLabel.IssueID = issueID
-		issueLabel.TenantID = tenantID
-		db.FirstOrCreate(&issueLabel)
 	}
 
 }
@@ -296,17 +287,16 @@ func syncUsersFromIssue(tenantID uint, issueID int64, RemoteIssueUsers []*github
 		assignee.Location = RemoteIssueUser.GetLocation()
 		assignee.Login = RemoteIssueUser.GetLogin()
 		assignee.Name = RemoteIssueUser.GetName()
-		assignee.RemoteIssueID = issueID
 		assignee.TenantID = tenantID
 		db.Clauses(clause.OnConflict{
 			UpdateAll: true,
 		}).Create(&assignee)
 
-		tenantUser := models.IssueAssignee{}
-		tenantUser.AssigneeID = RemoteIssueUser.GetID()
-		tenantUser.IssueID = issueID
-		tenantUser.TenantID = tenantID
-		db.FirstOrCreate(&tenantUser)
+		issueAssignee := models.IssueAssignee{}
+		issueAssignee.AssigneeID = RemoteIssueUser.GetID()
+		issueAssignee.IssueID = issueID
+		issueAssignee.TenantID = tenantID
+		db.FirstOrCreate(&issueAssignee)
 	}
 
 }
