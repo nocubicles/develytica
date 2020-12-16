@@ -15,3 +15,5 @@ require (
 	gorm.io/driver/postgres v1.0.5
 	gorm.io/gorm v1.20.8
 )
+
+replace github.com/google/go-github/v33 => github.com/nocubicles/go-github/v33 v33.0.1-0.20201216161729-92013ff0a7d4

@@ -28,6 +28,10 @@ var neededSyncs = []neededSync{
 		Name:     "issue",
 		Priority: 3,
 	},
+	{
+		Name:     "label",
+		Priority: 4,
+	},
 }
 
 //UpdateSyncJobs ensures that tenant has syncs enabled
@@ -213,7 +217,7 @@ func SyncGithubData(tenantID uint, syncName string, syncID uint) {
 		for _, tenantOrg := range tenantOrgs {
 			tenantRepos := []models.Repo{}
 
-			db.Where("remote_org_id = ?", tenantOrg.RemoteID).Find(&tenantRepos)
+			db.Select("name, remote_id").Where("remote_org_id = ?", tenantOrg.RemoteID).Find(&tenantRepos)
 
 			for _, tenantRepo := range tenantRepos {
 				if !shouldSyncRepo(tenantID, tenantRepo.RemoteID) {
@@ -245,6 +249,40 @@ func SyncGithubData(tenantID uint, syncName string, syncID uint) {
 		}
 
 		finishSyncHistory(syncHistory)
+	} else if syncName == "label" {
+		syncHistory := initiateSyncHistory(tenantID, syncID)
+		options := &github.ListOptions{
+			PerPage: perPage,
+		}
+		tenantOrgs := []models.Organization{}
+		db.Where("tenant_id = ?", tenantID).Find(&tenantOrgs)
+
+		for _, tenantOrg := range tenantOrgs {
+			tenantRepos := []models.Repo{}
+			db.Select("name, remote_id").Where("remote_org_id = ?", tenantOrg.RemoteID).Find(&tenantRepos)
+
+			for _, tenantRepo := range tenantRepos {
+				if !shouldSyncRepo(tenantID, tenantRepo.RemoteID) {
+					continue
+				}
+				labels, response, err := githubClient.Repositories.ListLabels(ctx, tenantOrg.Login, tenantRepo.Name, options)
+
+				if err != nil {
+					checkIfRateLimitErr(err)
+					checkIfAcceptedError(err)
+					fmt.Println(err)
+				}
+
+				syncLabels(tenantID, labels)
+
+				if response.NextPage == 0 {
+					break
+				}
+
+				options.Page = response.NextPage
+			}
+		}
+		finishSyncHistory(syncHistory)
 	}
 
 	fmt.Printf("Sync duration: %v", time.Since(start).Milliseconds())
@@ -261,11 +299,11 @@ func shouldSyncRepo(tenantID uint, repoID int64) bool {
 	return false
 }
 
-func syncLabelsFromIssue(tenantID uint, issueID int64, RemoteIssueLabels []*github.Label) {
+func syncLabels(tenantID uint, Labels []*github.Label) {
 	db := utils.DbConnection()
 
-	for i := range RemoteIssueLabels {
-		remoteIssueLabel := RemoteIssueLabels[i]
+	for i := range Labels {
+		remoteIssueLabel := Labels[i]
 		label := models.Label{}
 		label.Name = remoteIssueLabel.GetName()
 		label.TenantID = tenantID
@@ -357,7 +395,6 @@ func SyncGithubIssues(issues []*github.Issue, tenantID uint, repoID int64) {
 		db.Clauses(clause.OnConflict{
 			UpdateAll: true,
 		}).Create(&issue)
-		syncLabelsFromIssue(tenantID, issue.RemoteID, githubIssue.Labels)
 		syncUsersFromIssue(tenantID, issue.RemoteID, githubIssue.Assignees)
 
 	}
