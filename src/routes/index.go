@@ -8,6 +8,6 @@ import (
 
 func RenderSignIn(w http.ResponseWriter, r *http.Request) {
 
-	utils.Render(w, "signin.html", nil)
+	utils.Render(w, "signin.gohtml", nil)
 
 }

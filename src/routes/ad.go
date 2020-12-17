@@ -103,7 +103,7 @@ func RenderAdForm(w http.ResponseWriter, r *http.Request) {
 	}
 	var data = GetAdFormData(emptyAd)
 
-	utils.Render(w, "ad.html", data)
+	utils.Render(w, "ad.gohtml", data)
 }
 
 func getSelectionValues(input map[uint]string, userSelection uint) []SelectionValue {
@@ -163,9 +163,9 @@ func RenderAd(w http.ResponseWriter, r *http.Request) {
 			Images:             utils.GetAdImageUrls(adID),
 		}
 
-		utils.Render(w, "ad[adID].html", postedAd)
+		utils.Render(w, "ad[adID].gohtml", postedAd)
 	} else {
-		utils.Render(w, "notfound.html", "")
+		utils.Render(w, "notfound.gohtml", "")
 	}
 
 }
@@ -193,7 +193,7 @@ func ReceiveAdForm(w http.ResponseWriter, r *http.Request) {
 
 	if ad.Validate() == false {
 		var data = GetAdFormData(ad)
-		utils.Render(w, "ad.html", data)
+		utils.Render(w, "ad.gohtml", data)
 	}
 
 	db := utils.DbConnection()
@@ -206,7 +206,7 @@ func ReceiveAdForm(w http.ResponseWriter, r *http.Request) {
 		if len(files) > 5 {
 			var data = GetAdFormData(ad)
 			data.ImageUploadError = "Lubatud on laadida maksimum 5 pilti"
-			utils.Render(w, "ad.html", data)
+			utils.Render(w, "ad.gohtml", data)
 			return
 		}
 		for i := range files {
@@ -230,7 +230,7 @@ func ReceiveAdForm(w http.ResponseWriter, r *http.Request) {
 			if !strings.Contains(contentType, "image") {
 				var data = GetAdFormData(ad)
 				data.ImageUploadError = "Palun laadige ainult pilte"
-				utils.Render(w, "ad.html", data)
+				utils.Render(w, "ad.gohtml", data)
 				return
 			}
 

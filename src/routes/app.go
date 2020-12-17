@@ -49,5 +49,5 @@ func RenderApp(w http.ResponseWriter, r *http.Request) {
 	data.OrganizationsCount = OrgCount
 	data.UsersCount = UsersCount
 
-	utils.Render(w, "app.html", data)
+	utils.Render(w, "app.gohtml", data)
 }

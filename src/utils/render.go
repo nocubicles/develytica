@@ -7,7 +7,7 @@ import (
 )
 
 func Render(w http.ResponseWriter, filename string, data interface{}) {
-	tmpl, err := template.ParseGlob("templates/*")
+	tmpl, err := template.ParseGlob("static/templates/*")
 
 	if err != nil {
 		fmt.Println(err)

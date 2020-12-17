@@ -54,7 +54,7 @@ func TeamHandler(w http.ResponseWriter, r *http.Request) {
 		`, user.TenantID).
 			Scan(&teamMembers)
 		data.TeamMembers = teamMembers
-		utils.Render(w, "team.html", data)
+		utils.Render(w, "team.gohtml", data)
 
 		return
 	}

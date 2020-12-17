@@ -79,7 +79,7 @@ func RepoHandler(w http.ResponseWriter, r *http.Request) {
 
 		data.ReposData = getReposData(user.ID, user.TenantID)
 
-		utils.Render(w, "repositories.html", data)
+		utils.Render(w, "repositories.gohtml", data)
 	}
 }
 

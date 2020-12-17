@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+{{ template "head.gohtml" . }}
+
+<body>
+    {{ template "header.gohtml" . }}
+    <div class="container">
+        <div class="columns">
+            <div class="column is-3 ">
+                {{ template "side.gohtml" }}
+            </div>
+            <div class="column is-9">
+                <div class="card">
+                    <div class="card-content">
+                        <div class="media">
+                            <div class="media-left">
+                                <figure class="image is-48x48">
+                                    <img style="border-radius: 50%;" src="{{.TeamMemberData.AvatarURL}}" alt="Placeholder image">
+                                </figure>
+                            </div>
+
+                            <div class="media-content">
+                                <p class="title is-4">Profile name: {{.TeamMemberData.Login}}</p>
+                                <p class="subtitle is-6"><a href="https://github.com/{{.TeamMemberData.Login}}">Profile</a></p>
+                            </div>
+                        </div>
+
+                        <div class="content">
+                            <p class="title is-4">Skills</p>
+                            {{range .TeamMemberData.UserSkills}}
+                            <span class="tag is-success is-large">{{.SkillName}}<strong>{{.DoneCount}}</strong></span> {{end}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

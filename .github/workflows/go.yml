@@ -34,7 +34,7 @@ jobs:
 
     - name: Copy static files
       run: |
-        rm -rf bin/static/*.html
+        rm -rf bin/static/*.gohtml
         cp -r static bin/static
         
     - name: Test

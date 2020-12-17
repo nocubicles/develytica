@@ -77,7 +77,7 @@ func LabelHandler(w http.ResponseWriter, r *http.Request) {
 			Scan(&result)
 		data.LabelsData = result
 
-		utils.Render(w, "labels.html", data)
+		utils.Render(w, "labels.gohtml", data)
 		return
 	}
 

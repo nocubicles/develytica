@@ -80,7 +80,7 @@ func TeamMemberHandler(w http.ResponseWriter, r *http.Request) {
 			Scan(&userSkills)
 
 		data.TeamMemberData.UserSkills = userSkills
-		utils.Render(w, "teamMember.html", data)
+		utils.Render(w, "teamMember.gohtml", data)
 
 		return
 	}

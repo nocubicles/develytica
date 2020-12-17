@@ -45,7 +45,7 @@ func Organization(w http.ResponseWriter, r *http.Request) {
 			data.ValidationErrors = map[string]string{
 				"wrongOrg": "Please enter valid org name",
 			}
-			utils.Render(w, "organizations.html", data)
+			utils.Render(w, "organizations.gohtml", data)
 			return
 		}
 
@@ -60,13 +60,13 @@ func Organization(w http.ResponseWriter, r *http.Request) {
 				data.ValidationErrors = map[string]string{
 					"orgNotFound": "Organization not found",
 				}
-				utils.Render(w, "organizations.html", data)
+				utils.Render(w, "organizations.gohtml", data)
 				return
 			}
 			data.ValidationErrors = map[string]string{
 				"githubApiError": "Github API Error",
 			}
-			utils.Render(w, "organizations.html", data)
+			utils.Render(w, "organizations.gohtml", data)
 			return
 
 		}
@@ -75,7 +75,7 @@ func Organization(w http.ResponseWriter, r *http.Request) {
 			data.ValidationErrors = map[string]string{
 				"noPublicRepos": "This organization has no public repos. Therefore no point in syncing it",
 			}
-			utils.Render(w, "organizations.html", data)
+			utils.Render(w, "organizations.gohtml", data)
 			return
 		}
 
@@ -86,7 +86,7 @@ func Organization(w http.ResponseWriter, r *http.Request) {
 			if orgResult.RowsAffected > 0 {
 				data.Organizations = organizations
 			}
-			utils.Render(w, "organizations.html", data)
+			utils.Render(w, "organizations.gohtml", data)
 			return
 		}
 
@@ -99,7 +99,7 @@ func Organization(w http.ResponseWriter, r *http.Request) {
 		if orgResult.RowsAffected > 0 {
 			data.Organizations = organizations
 		}
-		utils.Render(w, "organizations.html", data)
+		utils.Render(w, "organizations.gohtml", data)
 		return
 	}
 
