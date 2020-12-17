@@ -1,22 +1,36 @@
-{{ template "header.html" . }}
-
+<!DOCTYPE html>
+<html>
+{{ template "head.html" . }}
 <body>
-    <section class="section">
-        <div class="container">
-            <h1 class="title">Tere. Palun logige sisse.</h1>
-            <form action="/logisisse" method="POST" novalidate>
-                <div>
-                    {{ with .Errors.email }}
-                    <p class="error">{{ . }}</p>
-                    {{ end }}
+	{{ template "header.html" . }}
+
+    <section class="hero is-fullheight is-default is-bold">
+        <div class="hero-body">
+            <div class="container has-text-centered">
+                <div class="columns is-vcentered">
+                    <div class="column is-5">
+                        <figure class="image is-4by3">
+                            <img src="https://picsum.photos/800/600/?random" alt="Description">
+                        </figure>
+                    </div>
+                    <div class="column is-6 is-offset-1">
+                        <h1 class="title is-2">
+                            Know where your team skills are
+                        </h1>
+                        <h2 class="subtitle is-4">
+                            Use github to track your team skills
+                        </h2>
+                        <br>
+                        <p class="has-text-centered">
+                            <a class="button is-medium is-info is-outlined">
+                                Learn more
+                            </a>
+                        </p>
+                    </div>
                 </div>
-                <p><label>Teie email:</label></p>
-                <p><input type="email" name="email" value="{{ .Email }}"></p>
-                <div>
-                    <input type="submit" value="Logi sisse">
-                </div>
-            </form>
+            </div>
         </div>
     </section>
+	{{ template "footer.html" .}}
 </body>
-{{ template "footer.html" .}}
+</html>

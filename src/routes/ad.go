@@ -240,7 +240,7 @@ func ReceiveAdForm(w http.ResponseWriter, r *http.Request) {
 		utils.GetAdImageUrls(ad.ID)
 	}
 
-	RenderHome(w, r)
+	RenderSignIn(w, r)
 }
 
 func getOpenUntil() time.Time {
