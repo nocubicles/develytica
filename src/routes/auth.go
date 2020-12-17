@@ -20,10 +20,12 @@ import (
 var githubOauthConfig = &oauth2.Config{}
 
 func init() {
-	err := godotenv.Load(".env")
+	if os.Getenv("GO_ENV") != "PRODUCTION" {
+		err := godotenv.Load(".env")
 
-	if err != nil {
-		panic("cannot load .env file")
+		if err != nil {
+			panic("cannot load .env file")
+		}
 	}
 
 	githubOauthConfig.RedirectURL = "http://localhost:3000/auth/github/callback"

@@ -16,7 +16,6 @@ func init() {
 		if err != nil {
 			panic("cannot load .env file")
 		}
-
 	}
 
 }
