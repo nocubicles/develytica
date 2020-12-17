@@ -12,6 +12,7 @@ type TeamMember struct {
 	Login       string
 	AvatarURL   string
 	Location    string
+	RemoteID    int64
 	IssuesCount int64 `gorm:"column:issuescount"`
 }
 
@@ -44,11 +45,13 @@ func TeamHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if r.Method == http.MethodGet {
-		db.Raw(`select a.login,a.avatar_url, a.location, count(ia.assignee_id) as issuescount
+		db.Raw(`select a.login, a.avatar_url, a.location, a.remote_id, count(ia.assignee_id) as issuescount
 		from assignees a
 		left join issue_assignees ia on ia.assignee_id = a.remote_id
 		where a.tenant_id = ?
-		group by a.login,a.avatar_url,a.location`, user.TenantID).
+		group by a.login,a.avatar_url,a.location,a.remote_id
+		order by issuescount desc
+		`, user.TenantID).
 			Scan(&teamMembers)
 		data.TeamMembers = teamMembers
 		utils.Render(w, "team.html", data)

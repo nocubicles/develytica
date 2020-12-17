@@ -210,7 +210,7 @@ func SyncGithubData(tenantID uint, syncName string, syncID uint) {
 		finishSyncHistory(syncHistory)
 	} else if syncName == "issue" {
 		syncHistory := initiateSyncHistory(tenantID, syncID)
-		options := &github.IssueListByRepoOptions{ListOptions: github.ListOptions{PerPage: perPage}, State: "all"}
+		options := &github.IssueListByRepoOptions{ListOptions: github.ListOptions{PerPage: perPage}, State: "closed"}
 		tenantOrgs := []models.Organization{}
 		db.Where("tenant_id = ?", tenantID).Find(&tenantOrgs)
 
@@ -307,9 +307,24 @@ func syncLabels(tenantID uint, Labels []*github.Label) {
 		label := models.Label{}
 		label.Name = remoteIssueLabel.GetName()
 		label.TenantID = tenantID
+		label.LabelID = remoteIssueLabel.GetID()
 		db.Clauses(clause.OnConflict{
 			UpdateAll: true,
 		}).Create(&label)
+	}
+
+}
+
+func syncLabelsFromIssue(tenantID uint, issueID int64, RemoteIssueLabels []*github.Label) {
+	db := utils.DbConnection()
+
+	for i := range RemoteIssueLabels {
+		label := RemoteIssueLabels[i]
+		issueLabel := models.IssueLabel{}
+		issueLabel.LabelID = label.GetID()
+		issueLabel.IssueID = issueID
+		issueLabel.TenantID = tenantID
+		db.FirstOrCreate(&issueLabel)
 	}
 
 }
@@ -368,6 +383,8 @@ func isSyncInProgress(sync models.Sync) bool {
 func updateSyncInProgress(sync *models.Sync) {
 	db := utils.DbConnection()
 	sync.InProgress = !sync.InProgress
+	sync.LastRunSuccess = !sync.LastRunSuccess
+	sync.LastRun = time.Now()
 	db.Save(&sync)
 }
 
@@ -379,6 +396,10 @@ func SyncGithubIssues(issues []*github.Issue, tenantID uint, repoID int64) {
 		if len(githubIssue.Labels) == 0 {
 			continue
 		}
+		if len(githubIssue.Assignees) == 0 {
+			continue
+		}
+
 		issue.RemoteRepoID = repoID
 		issue.AssigneeID = githubIssue.GetAssignee().GetID()
 		issue.AuthorAssociation = githubIssue.GetAuthorAssociation()
@@ -395,8 +416,8 @@ func SyncGithubIssues(issues []*github.Issue, tenantID uint, repoID int64) {
 		db.Clauses(clause.OnConflict{
 			UpdateAll: true,
 		}).Create(&issue)
+		syncLabelsFromIssue(tenantID, issue.RemoteID, githubIssue.Labels)
 		syncUsersFromIssue(tenantID, issue.RemoteID, githubIssue.Assignees)
-
 	}
 }
 

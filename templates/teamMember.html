@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+{{ template "head.html" . }}
+
+<body>
+    {{ template "header.html" . }}
+    <div class="container">
+        <div class="columns">
+            <div class="column is-3 ">
+                {{ template "side.html" }}
+            </div>
+            <div class="column is-9">
+             <div class="card">
+                <div class="card-content">
+                    <div class="media">
+                        <div class="media-left">
+                          <figure class="image is-48x48">
+                            <img style="border-radius: 50%;" src="{{.TeamMemberData.AvatarURL}}" alt="Placeholder image">
+                          </figure>
+                        </div>
+                   
+                        <div class="media-content">
+                            <p class="title is-4">{{.TeamMemberData.Login}}</p>
+                            <p class="subtitle is-6"><a href="https://github.com/{{.TeamMemberData.Login}}">Profile</a></p>
+                        </div>
+                    </div>
+
+                    <div class="content">
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                        Phasellus nec iaculis mauris. <a>@bulmaio</a>.
+                        <a href="#">#css</a> <a href="#">#responsive</a>
+                        <br>
+                        <time datetime="2016-1-1">11:09 PM - 1 Jan 2016</time>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
