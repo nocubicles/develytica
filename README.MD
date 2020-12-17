@@ -1,3 +1,4 @@
-## skillbase.io
+## develytica.com
 
-This is a project called skillbase.io - a website so buy, sell, change bicycles etc.
+How this works?
+

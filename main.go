@@ -3,17 +3,22 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/joho/godotenv"
 	"github.com/nocubicles/skillbase.io/src/utils"
 )
 
 func init() {
-	err := godotenv.Load(".env")
+	if os.Getenv("GO_ENV") != "PRODUCTION" {
+		err := godotenv.Load(".env")
 
-	if err != nil {
-		panic("cannot load .env file")
+		if err != nil {
+			panic("cannot load .env file")
+		}
+
 	}
+
 }
 
 func main() {

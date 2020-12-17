@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+{{ template "head.html" . }}
+
+<body>
+    {{ template "header.html" . }}
+    <div class="container">
+        <div class="columns">
+            <div class="column is-3 ">
+                {{ template "side.html" }}
+            </div>
+            <div class="column is-9">
+                <h2 class="title is-2">These are the organizations that you have granted access to us</h2>
+                <div class="content">
+                    <p>We can keep all the repos, issues and labels in sync from these organizations.</p>
+                    <p>You can add more organizations if you want to.</p>
+                    <div id="modal" class="modal">
+                        <div class="modal-background"></div>
+                        <div class="modal-content">
+                            <form action="/organizations" method="POST" enctype="multipart/form-data" novalidate id="newOrg">
+                                <div class="box">
+                                    <div class="field">
+                                        <label class="label">Organization name to add</label>
+                                        <div class="control">
+                                            <input class="input" type="text" placeholder="" name="newOrg" />
+                                        </div>
+                                    </div>
+                                    <button class="button is-link">Add</button>
+                                </div>
+                            </form>
+                        </div>
+                        <button class="modal-close is-large" aria-label="close"></button>
+                    </div>
+                    <button class="button is-primary is-small modal-button" data-target="modal" aria-haspopup="true">Add new Github Organization</button> {{range .ValidationErrors}}
+                    <p class="help is-danger">{{ .}}</p>
+                    {{ end }}
+                    <h3 class="title is-3">Your organizations</h3>
+                    <ul type="1">
+                        {{ range .Organizations}}
+                        <li>{{.Login}}</li>
+                        {{end}}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
