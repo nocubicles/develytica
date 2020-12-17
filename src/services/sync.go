@@ -307,10 +307,8 @@ func syncLabels(tenantID uint, Labels []*github.Label) {
 		label := models.Label{}
 		label.Name = remoteIssueLabel.GetName()
 		label.TenantID = tenantID
-		label.LabelID = remoteIssueLabel.GetID()
-		db.Clauses(clause.OnConflict{
-			UpdateAll: true,
-		}).Create(&label)
+		db.FirstOrCreate(&label)
+
 	}
 
 }
@@ -321,7 +319,7 @@ func syncLabelsFromIssue(tenantID uint, issueID int64, RemoteIssueLabels []*gith
 	for i := range RemoteIssueLabels {
 		label := RemoteIssueLabels[i]
 		issueLabel := models.IssueLabel{}
-		issueLabel.LabelID = label.GetID()
+		issueLabel.Name = label.GetName()
 		issueLabel.IssueID = issueID
 		issueLabel.TenantID = tenantID
 		db.FirstOrCreate(&issueLabel)

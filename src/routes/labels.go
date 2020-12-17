@@ -54,10 +54,11 @@ func LabelHandler(w http.ResponseWriter, r *http.Request) {
 		for key, values := range r.PostForm {
 
 			if key == "labelTracked" && len(values) > 0 {
-				label := models.Label{}
-				db.Model(label).Where("tenant_id = ?", user.TenantID).Update("tracked", false)
+				labelTracking := models.LabelTracking{}
 
-				db.Table("labels").Where("name IN ?", values).Updates(map[string]interface{}{"tracked": true})
+				db.Where("tenant_id = ?", user.TenantID).Delete(&labelTracking)
+
+				db.Table("label_trackings").Where("tenant_id = ? AND name IN ?", user.TenantID, values).Create(map[string]interface{}{"is_tracked": true})
 
 				go services.DoImmidiateFullSyncByTenantID(user.TenantID)
 			}
@@ -68,10 +69,11 @@ func LabelHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
 		result := []LabelData{}
 
-		db.Model(&models.Label{}).
-			Select("labels.name, labels.tracked").
-			Where("tenant_id = ?", user.TenantID).
-			Order("name desc").
+		db.Raw(`SELECT labels.name, label_trackings.is_tracked FROM labels 
+		LEFT JOIN label_trackings ON label_trackings.tenant_id = labels.tenant_id 
+		AND label_trackings.name = labels.name 
+		WHERE labels.tenant_id = ?
+		ORDER BY labels.name desc`, user.TenantID).
 			Scan(&result)
 		data.LabelsData = result
 

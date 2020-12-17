@@ -56,11 +56,11 @@ func TeamMemberHandler(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == http.MethodGet {
 		db.Raw(`select a.login, a.avatar_url, a.location, a.remote_id, count(ia.assignee_id) as issuescount
-		from assignees a
-		left join issue_assignees ia on ia.assignee_id = a.remote_id
-		where a.tenant_id = ? AND a.remote_id = ?
-		group by a.login,a.avatar_url,a.location,a.remote_id
-		order by issuescount desc
+		FROM assignees a
+		LEFT JOIN issue_assignees ia on ia.assignee_id = a.remote_id
+		WHERE a.tenant_id = ? AND a.remote_id = ?
+		GROUP BY a.login,a.avatar_url,a.location,a.remote_id
+		ORDER BY issuescount desc
 		`, user.TenantID, teamMemberID).
 			Scan(&teamMember)
 		data.TeamMemberData = teamMember
@@ -74,8 +74,8 @@ func TeamMemberHandler(w http.ResponseWriter, r *http.Request) {
 			LEFT JOIN issue_labels on issue_labels.issue_id = issue_assignees.issue_id
 			LEFT JOIN labels on labels.label_id = issue_labels.label_id
 			WHERE issue_assignees.tenant_id = ? AND issue_assignees.assignee_id = ? AND labels.tracked = true
-			group by skillname, assigneeID
-			order by donecount desc
+			GROUP BY skillname, assigneeID
+			ORDER BY donecount desc
 		`, user.TenantID, teamMemberID).
 			Scan(&userSkills)
 
