@@ -20,7 +20,6 @@ type TeamMemberData struct {
 	Location    string
 	RemoteID    int64
 	IssuesCount int64 `gorm:"column:issuescount"`
-	UserSkills  []UserSkill
 }
 
 type TeamMemberPageData struct {
@@ -28,6 +27,7 @@ type TeamMemberPageData struct {
 	UserName         string
 	TeamMemberData   TeamMemberData
 	ValidationErrors map[string]string
+	UserSkills       []UserSkill
 }
 
 func TeamMemberHandler(w http.ResponseWriter, r *http.Request) {
@@ -67,19 +67,17 @@ func TeamMemberHandler(w http.ResponseWriter, r *http.Request) {
 
 		userSkills := []UserSkill{}
 		db.Raw(`
-			SELECT labels.name as skillname, 
-			issue_assignees.assignee_id as assigneeID, 
-			count(issue_labels.label_id) as donecount
+			SELECT issue_labels.name as skillname,
+			count(issue_assignees.issue_id) as donecount
 			FROM issue_assignees
-			LEFT JOIN issue_labels on issue_labels.issue_id = issue_assignees.issue_id
-			LEFT JOIN labels on labels.label_id = issue_labels.label_id
-			WHERE issue_assignees.tenant_id = ? AND issue_assignees.assignee_id = ? AND labels.tracked = true
-			GROUP BY skillname, assigneeID
+			LEFT JOIN issue_labels ON issue_labels.issue_id = issue_assignees.issue_id
+			WHERE issue_assignees.tenant_id = ? AND issue_assignees.assignee_id = ?
+			GROUP BY skillname
 			ORDER BY donecount desc
 		`, user.TenantID, teamMemberID).
 			Scan(&userSkills)
 
-		data.TeamMemberData.UserSkills = userSkills
+		data.UserSkills = userSkills
 		utils.Render(w, "teamMember.gohtml", data)
 
 		return

@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/nocubicles/develytica/src/models"
-	"github.com/nocubicles/develytica/src/services"
 	"github.com/nocubicles/develytica/src/utils"
 )
 
@@ -65,7 +64,6 @@ func LabelHandler(w http.ResponseWriter, r *http.Request) {
 					labelsTrackings = append(labelsTrackings, labelTracking)
 				}
 				db.Create(&labelsTrackings)
-				go services.DoImmidiateFullSyncByTenantID(user.TenantID)
 			}
 		}
 		http.Redirect(w, r, "/labels", http.StatusTemporaryRedirect)
