@@ -1,1 +1,1 @@
-web: bin/develytica
+web: bin\develytica
