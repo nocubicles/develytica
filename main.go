@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -17,7 +18,6 @@ func init() {
 			panic("cannot load .env file")
 		}
 	}
-
 }
 
 func main() {
@@ -32,7 +32,12 @@ func main() {
 
 	log.Println("Listening..")
 	router := router()
-	err = http.ListenAndServe(":3000", router)
+
+	PORT := os.Getenv("PORT")
+
+	srv := fmt.Sprintf(":%s", PORT)
+
+	err = http.ListenAndServe(srv, router)
 
 	if err != nil {
 		log.Fatal(err)
