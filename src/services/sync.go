@@ -2,6 +2,8 @@ package services
 
 import (
 	"fmt"
+	"os"
+	"strconv"
 	"time"
 
 	"github.com/google/go-github/v33/github"
@@ -63,6 +65,13 @@ func CreateSyncJobs(tenantID uint) {
 	}
 }
 
+func ScanAndDoSyncs() {
+	for {
+		time.Sleep(5 * time.Second)
+		go DoFullSyncAllUsersPeriodic()
+	}
+}
+
 func DoImmidiateFullSyncByTenantID(tenantID uint) {
 	syncs := []models.Sync{}
 	db := utils.DbConnection()
@@ -83,7 +92,14 @@ func DoImmidiateFullSyncByTenantID(tenantID uint) {
 
 func DoFullSyncAllUsersPeriodic() {
 	syncs := []models.Sync{}
-	syncInterval := 4 * time.Hour
+	syncEveryHour, err := strconv.ParseInt(os.Getenv("SYNC_EVERY_HOUR"), 10, 64)
+	var DEFAULT_SYNC_EVERY_HOUR = int64(2)
+
+	if err != nil {
+		syncEveryHour = DEFAULT_SYNC_EVERY_HOUR
+	}
+
+	syncInterval := time.Duration(syncEveryHour) * time.Hour
 	syncDateNeeded := time.Now().Add(-syncInterval)
 	db := utils.DbConnection()
 

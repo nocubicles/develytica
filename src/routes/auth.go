@@ -114,7 +114,7 @@ func setupUserFromGithub(code string) (models.User, error) {
 
 		db.Create(&userClaim)
 		services.CreateSyncJobs(user.TenantID)
-		go services.DoImmidiateFullSyncByTenantID(user.TenantID)
+		services.DoImmidiateFullSyncByTenantID(user.TenantID)
 	}
 	return user, nil
 }

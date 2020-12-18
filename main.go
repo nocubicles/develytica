@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
+	"github.com/nocubicles/develytica/src/services"
 	"github.com/nocubicles/develytica/src/utils"
 )
 
@@ -30,6 +31,8 @@ func main() {
 
 	defer sqlDB.Close()
 
+	services.ScanAndDoSyncs()
+
 	log.Println("Listening..")
 	router := router()
 
@@ -42,4 +45,5 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
 }
