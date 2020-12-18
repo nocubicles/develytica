@@ -31,7 +31,7 @@ func main() {
 
 	defer sqlDB.Close()
 
-	services.ScanAndDoSyncs()
+	go services.ScanAndDoSyncs()
 
 	log.Println("Listening..")
 	router := router()
