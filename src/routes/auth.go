@@ -28,7 +28,7 @@ func init() {
 		}
 	}
 
-	githubOauthConfig.RedirectURL = "http://localhost:3000/auth/github/callback"
+	githubOauthConfig.RedirectURL = os.Getenv("GITHUB_CALLBACK_URI")
 	githubOauthConfig.ClientID = os.Getenv("GITHUB_OAUTH_CLIENT_ID")
 	githubOauthConfig.ClientSecret = os.Getenv("GITHUB_OAUTH_CLIENT_SECRET")
 	githubOauthConfig.Scopes = []string{"repo", "user", "read:org"}
