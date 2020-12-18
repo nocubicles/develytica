@@ -10,8 +10,8 @@ import (
 )
 
 type LabelData struct {
-	Name    string
-	Tracked bool
+	Name      string
+	IsTracked bool
 }
 
 type LabelPageData struct {
@@ -55,11 +55,16 @@ func LabelHandler(w http.ResponseWriter, r *http.Request) {
 
 			if key == "labelTracked" && len(values) > 0 {
 				labelTracking := models.LabelTracking{}
-
+				labelsTrackings := []models.LabelTracking{}
 				db.Where("tenant_id = ?", user.TenantID).Delete(&labelTracking)
 
-				db.Table("label_trackings").Where("tenant_id = ? AND name IN ?", user.TenantID, values).Create(map[string]interface{}{"is_tracked": true})
-
+				for i := range values {
+					labelTracking.Name = values[i]
+					labelTracking.TenantID = user.TenantID
+					labelTracking.IsTracked = true
+					labelsTrackings = append(labelsTrackings, labelTracking)
+				}
+				db.Create(&labelsTrackings)
 				go services.DoImmidiateFullSyncByTenantID(user.TenantID)
 			}
 		}

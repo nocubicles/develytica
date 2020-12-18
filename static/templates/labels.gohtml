@@ -34,7 +34,7 @@
                                 {{ range .LabelsData}}
                                 <tr>
                                     <td>{{.Name}}</td>
-                                    <td><input type="checkbox" name="labelTracked" value={{ .Name}} {{ if .Tracked}}checked{{end}}/></td>
+                                    <td><input type="checkbox" name="labelTracked" value={{ .Name}} {{ if .IsTracked}}checked{{end}}/></td>
                                 </tr>
                                 {{end}}
                             </tbody>
