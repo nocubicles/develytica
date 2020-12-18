@@ -23,7 +23,7 @@ func init() {
 			panic("cannot load .env file")
 		}
 	}
-	dsn := os.Getenv("DBConnectionString")
+	dsn := os.Getenv("DATABASE_URL")
 	db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Info),
 	})
