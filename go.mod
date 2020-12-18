@@ -5,7 +5,6 @@ go 1.15
 require (
 	github.com/aws/aws-sdk-go v1.35.33
 	github.com/gofrs/uuid v3.2.0+incompatible
-	github.com/google/go-github v17.0.0+incompatible // indirect
 	github.com/google/go-github/v33 v33.0.0
 	github.com/gorilla/mux v1.8.0
 	github.com/jinzhu/gorm v1.9.16
