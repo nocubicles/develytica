@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/google/go-github/v33/github"
-	"github.com/nocubicles/skillbase.io/src/models"
+	"github.com/nocubicles/develytica/src/models"
 	"golang.org/x/oauth2"
 )
 

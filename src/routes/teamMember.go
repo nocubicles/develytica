@@ -5,8 +5,8 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-	"github.com/nocubicles/skillbase.io/src/models"
-	"github.com/nocubicles/skillbase.io/src/utils"
+	"github.com/nocubicles/develytica/src/models"
+	"github.com/nocubicles/develytica/src/utils"
 )
 
 type UserSkill struct {

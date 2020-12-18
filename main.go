@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
-	"github.com/nocubicles/skillbase.io/src/utils"
+	"github.com/nocubicles/develytica/src/utils"
 )
 
 func init() {

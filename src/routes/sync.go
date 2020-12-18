@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/nocubicles/skillbase.io/src/models"
-	"github.com/nocubicles/skillbase.io/src/services"
-	"github.com/nocubicles/skillbase.io/src/utils"
+	"github.com/nocubicles/develytica/src/models"
+	"github.com/nocubicles/develytica/src/services"
+	"github.com/nocubicles/develytica/src/utils"
 )
 
 func Sync(w http.ResponseWriter, r *http.Request) {

@@ -12,7 +12,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 )
 
-var bucketName = "skillbase.io"
+var bucketName = "develytica"
 
 func getImageKey(adID uint, fileName string) string {
 	return "kuulutused/pildid/" + fmt.Sprint(adID) + "/" + fileName

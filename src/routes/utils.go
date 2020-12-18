@@ -9,9 +9,9 @@ import (
 	"time"
 
 	"github.com/gofrs/uuid"
-	"github.com/nocubicles/skillbase.io/src/models"
-	"github.com/nocubicles/skillbase.io/src/types"
-	"github.com/nocubicles/skillbase.io/src/utils"
+	"github.com/nocubicles/develytica/src/models"
+	"github.com/nocubicles/develytica/src/types"
+	"github.com/nocubicles/develytica/src/utils"
 )
 
 func setCookieForUser(w http.ResponseWriter, email string) error {
@@ -22,7 +22,7 @@ func setCookieForUser(w http.ResponseWriter, email string) error {
 	}
 
 	cookie := http.Cookie{
-		Name:     "skillbase",
+		Name:     "develytica",
 		Value:    sessionID.String(),
 		Expires:  expiration,
 		HttpOnly: true,

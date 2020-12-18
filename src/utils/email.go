@@ -39,11 +39,11 @@ func SendSignInEmail(to string, signInToken string) error {
 	msg := fmt.Sprintf(
 		"To: %s\r\n"+
 			fromMime+
-			"Subject: Teie sisse logimise link skillbase.io\n"+
+			"Subject: Teie sisse logimise link develytica\n"+
 			mime+
 			"<html><body>"+
 			"<p>Palun vajutage %s, et logida sisse.</p>"+
-			"<p>skillbase.io</p>"+
+			"<p>develytica</p>"+
 			"</body></html>",
 		to, loginLink,
 	)

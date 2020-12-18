@@ -10,9 +10,9 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/nocubicles/skillbase.io/src/constants"
-	"github.com/nocubicles/skillbase.io/src/models"
-	"github.com/nocubicles/skillbase.io/src/utils"
+	"github.com/nocubicles/develytica/src/constants"
+	"github.com/nocubicles/develytica/src/models"
+	"github.com/nocubicles/develytica/src/utils"
 )
 
 type SelectionValue struct {

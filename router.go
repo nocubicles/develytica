@@ -4,8 +4,8 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-	"github.com/nocubicles/skillbase.io/src/middleware"
-	"github.com/nocubicles/skillbase.io/src/routes"
+	"github.com/nocubicles/develytica/src/middleware"
+	"github.com/nocubicles/develytica/src/routes"
 )
 
 func router() *mux.Router {

@@ -1,4 +1,4 @@
-module github.com/nocubicles/skillbase.io
+module github.com/nocubicles/develytica
 
 go 1.15
 
