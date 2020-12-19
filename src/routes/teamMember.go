@@ -71,7 +71,10 @@ func TeamMemberHandler(w http.ResponseWriter, r *http.Request) {
 			count(issue_assignees.issue_id) as donecount
 			FROM issue_assignees
 			LEFT JOIN issue_labels ON issue_labels.issue_id = issue_assignees.issue_id
-			WHERE issue_assignees.tenant_id = ? AND issue_assignees.assignee_id = ?
+			LEFT JOIN label_trackings ON label_trackings.name = issue_labels.name
+			WHERE issue_assignees.tenant_id = ?
+			AND issue_assignees.assignee_id = ?
+			AND label_trackings.is_tracked = true
 			GROUP BY skillname
 			ORDER BY donecount desc
 		`, user.TenantID, teamMemberID).
