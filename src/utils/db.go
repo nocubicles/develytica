@@ -53,6 +53,7 @@ func init() {
 		&models.IssueLabel{},
 		&models.RepoTracking{},
 		&models.LabelTracking{},
+		&models.TenantLimit{},
 	)
 
 	if err != nil {
