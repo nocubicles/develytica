@@ -92,55 +92,8 @@ func getTeamMembers(tenantID uint, teamMembers *[]TeamMember, limit int) *[]Team
 		where a.tenant_id = ?
 		group by a.login,a.avatar_url,a.location,a.remote_id
 		order by issuescount desc
-		`, tenantID).
-		Limit(limit).
+		limit = ?
+		`, tenantID, limit).
 		Scan(&teamMembers)
 	return teamMembers
-}
-
-func IsOrgLimitOver(tenantID uint) bool {
-	db := utils.DbConnection()
-
-	tenantLimits := models.TenantLimit{}
-	tenantLimitResultsresult := db.First(&tenantLimits, tenantID)
-	orgs := models.Organization{}
-
-	if tenantLimitResultsresult.RowsAffected == 0 {
-		tenantLimits.Repos = 10
-	}
-
-	orgResults := db.Where("tenant_id = ?", tenantID).Find(&orgs)
-
-	if orgResults.RowsAffected <= int64(tenantLimits.Org) {
-		return false
-	}
-	return true
-}
-
-func IsRepoLimitOver(tenantID uint) bool {
-	db := utils.DbConnection()
-
-	tenantLimits := models.TenantLimit{}
-	tenantLimitResultsresult := db.First(&tenantLimits, tenantID)
-	repos := models.Repo{}
-
-	if tenantLimitResultsresult.RowsAffected == 0 {
-		tenantLimits.Repos = 10
-	}
-
-	repoResults := db.Where("tenant_id = ?", tenantID).Find(&repos)
-
-	if repoResults.RowsAffected <= int64(tenantLimits.Org) {
-		return false
-	}
-	return true
-}
-
-func createTenantLimits(tenantID uint) {
-	db := utils.DbConnection()
-	tenantLimits := models.TenantLimit{}
-
-	tenantLimits.TenantID = tenantID
-	db.Create(&tenantLimits)
-	return
 }

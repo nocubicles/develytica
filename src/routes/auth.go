@@ -104,7 +104,7 @@ func setupUserFromGithub(code string) (models.User, error) {
 	} else {
 		//new user, never seen before
 		db.Create(&tenant)
-		createTenantLimits(tenant.ID)
+		utils.CreateTenantLimits(tenant.ID)
 		user.Email = *githubUser.Email
 		user.TenantID = tenant.ID
 		db.Create(&user)
