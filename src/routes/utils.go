@@ -92,7 +92,8 @@ func getTeamMembers(tenantID uint, teamMembers *[]TeamMember, limit int) *[]Team
 		where a.tenant_id = ?
 		group by a.login,a.avatar_url,a.location,a.remote_id
 		order by issuescount desc
-		limit = ?
+		limit ?
+
 		`, tenantID, limit).
 		Scan(&teamMembers)
 	return teamMembers

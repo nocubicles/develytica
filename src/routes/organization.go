@@ -49,6 +49,14 @@ func Organization(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		if utils.IsOrgLimitOver(user.TenantID) {
+			data.ValidationErrors = map[string]string{
+				"limit": "Organization limit exceeded",
+			}
+			utils.Render(w, "organizations.gohtml", data)
+			return
+		}
+
 		githubClient, ctx := utils.GetGithubClientByTenant(user.TenantID)
 		githubOrg, _, err := githubClient.Organizations.Get(ctx, githubOrgName)
 

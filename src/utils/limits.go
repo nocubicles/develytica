@@ -9,7 +9,7 @@ func IsRepoLimitOver(tenantID uint) bool {
 
 	tenantLimits := models.TenantLimit{}
 	tenantLimitResultsresult := db.First(&tenantLimits, tenantID)
-	repos := models.Repo{}
+	repos := []models.Repo{}
 
 	if tenantLimitResultsresult.RowsAffected == 0 {
 		tenantLimits.Repos = 10
@@ -28,10 +28,10 @@ func IsOrgLimitOver(tenantID uint) bool {
 
 	tenantLimits := models.TenantLimit{}
 	tenantLimitResultsresult := db.First(&tenantLimits, tenantID)
-	orgs := models.Organization{}
+	orgs := []models.Organization{}
 
 	if tenantLimitResultsresult.RowsAffected == 0 {
-		tenantLimits.Repos = 10
+		tenantLimits.Org = 3
 	}
 
 	orgResults := db.Where("tenant_id = ?", tenantID).Find(&orgs)
@@ -47,6 +47,8 @@ func CreateTenantLimits(tenantID uint) {
 	tenantLimits := models.TenantLimit{}
 
 	tenantLimits.TenantID = tenantID
+	tenantLimits.Org = 3
+	tenantLimits.Repos = 10
 	db.Create(&tenantLimits)
 	return
 }
