@@ -15,6 +15,7 @@ type HomePageData struct {
 	ReposCount         int64
 	LabelsCount        int64
 	UsersCount         int64
+	TeamMembers        []TeamMember
 }
 
 func RenderApp(w http.ResponseWriter, r *http.Request) {
@@ -31,9 +32,11 @@ func RenderApp(w http.ResponseWriter, r *http.Request) {
 		Authenticated: false,
 		UserName:      "",
 	}
+	teamMembers := []TeamMember{}
 	if result.RowsAffected > 0 {
 		data.Authenticated = true
 		data.UserName = user.Email
+		data.TeamMembers = teamMembers
 	}
 	var OrgCount int64
 	db.Model(&models.Organization{}).Count(&OrgCount)
@@ -48,6 +51,7 @@ func RenderApp(w http.ResponseWriter, r *http.Request) {
 	data.ReposCount = ReposCount
 	data.OrganizationsCount = OrgCount
 	data.UsersCount = UsersCount
+	data.TeamMembers = *getTeamMembers(user.TenantID, &teamMembers, 10)
 
 	utils.Render(w, "app.gohtml", data)
 }
