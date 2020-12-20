@@ -25,10 +25,25 @@
                             </div>
                         </div>
 
-                        <div class="content">
-                            <p class="title is-4">Skills</p>
-                            {{range .UserSkills}}
-                            <span class="tag is-success is-large">{{.SkillName}}<strong>{{.DoneCount}}</strong></span> {{end}}
+                        <div class="table-container">
+                            <table class="table is-striped is-fullwidth">
+                                <thead>
+                                    <tr>
+                                        <th>Skill</th>
+                                        <th>Issues closed with this skill</th>
+                                        <th>Last time used day(s) ago</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {{range .UserSkills}}
+                                    <tr>
+                                        <td>{{.SkillName}}</td>
+                                        <td>{{.DoneCount}}</td>
+                                        <td>{{.LastUsedDaysAgo}}</td>
+                                    </tr>
+                                    {{end}}
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>

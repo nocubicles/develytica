@@ -3,6 +3,7 @@ package routes
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/nocubicles/develytica/src/models"
@@ -10,8 +11,10 @@ import (
 )
 
 type UserSkill struct {
-	SkillName string `gorm:"column:skillname"`
-	DoneCount int    `gorm:"column:donecount"`
+	SkillName       string    `gorm:"column:skillname"`
+	DoneCount       int       `gorm:"column:donecount"`
+	LastUsed        time.Time `gorm:"column:lastused"`
+	LastUsedDaysAgo int
 }
 
 type TeamMemberData struct {
@@ -67,18 +70,25 @@ func TeamMemberHandler(w http.ResponseWriter, r *http.Request) {
 
 		userSkills := []UserSkill{}
 		db.Raw(`
-			SELECT issue_labels.name as skillname,
-			count(issue_assignees.issue_id) as donecount
+			SELECT 
+			issue_labels.name as skillname,
+			count(issue_assignees.issue_id) as donecount,
+			issues.closed_at as lastused
 			FROM issue_assignees
 			LEFT JOIN issue_labels ON issue_labels.issue_id = issue_assignees.issue_id
 			LEFT JOIN label_trackings ON label_trackings.name = issue_labels.name
+			LEFT JOIN issues ON issues.remote_id = issue_assignees.issue_id
 			WHERE issue_assignees.tenant_id = ?
 			AND issue_assignees.assignee_id = ?
 			AND label_trackings.is_tracked = true
-			GROUP BY skillname
+			GROUP BY skillname, lastused
 			ORDER BY donecount desc
 		`, user.TenantID, teamMemberID).
 			Scan(&userSkills)
+
+		for i := range userSkills {
+			userSkills[i].LastUsedDaysAgo = daysBetween(time.Now(), userSkills[i].LastUsed)
+		}
 
 		data.UserSkills = userSkills
 		utils.Render(w, "teamMember.gohtml", data)
@@ -86,4 +96,18 @@ func TeamMemberHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+}
+
+func daysBetween(a, b time.Time) int {
+	if a.After(b) {
+		a, b = b, a
+	}
+
+	days := -a.YearDay()
+	for year := a.Year(); year < b.Year(); year++ {
+		days += time.Date(year, time.December, 31, 0, 0, 0, 0, time.UTC).YearDay()
+	}
+	days += b.YearDay()
+
+	return days
 }
