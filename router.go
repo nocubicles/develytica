@@ -29,6 +29,7 @@ func router() *mux.Router {
 
 	router.Handle("/team", middleware.CheckIsUsedLoggedIn(routes.TeamHandler)).Methods(http.MethodGet, http.MethodOptions)
 	router.Handle("/team/{teamMember}", middleware.CheckIsUsedLoggedIn(routes.TeamMemberHandler)).Methods(http.MethodGet, http.MethodOptions)
+	router.Handle("/teamskills", middleware.CheckIsUsedLoggedIn(routes.TeamSkillsHandler)).Methods(http.MethodGet, http.MethodOptions)
 
 	router.HandleFunc("/sync", middleware.CheckIsUsedLoggedIn(routes.Sync)).Methods(http.MethodPost, http.MethodOptions)
 	router.Use(mux.CORSMethodMiddleware(router))

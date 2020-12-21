@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+{{ template "head.gohtml" . }}
+
+<body>
+    {{ template "header.gohtml" . }}
+    <div class="container">
+        <div class="columns">
+            <div class="column is-3 ">
+                {{ template "side.gohtml" }}
+            </div>
+            <div class="column is-9">
+                <h2 class="title is-2">These are all labels that you have marked as skills that we are tracking</h2>
+
+                <div class="card">
+                    <div class="card-content">
+
+
+                        <div class="table-container">
+                            <table class="table is-striped is-fullwidth">
+                                <thead>
+                                    <tr>
+                                        <th>Skill</th>
+                                        <th>Issues closed with this skill</th>
+                                        <th>Last time used day(s) ago</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {{range .Skills}}
+                                    <tr>
+                                        <td>{{.SkillName}}</td>
+                                        <td>{{.DoneCount}}</td>
+                                        <td>{{.LastUsedDaysAgo}}</td>
+                                    </tr>
+                                    {{end}}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
