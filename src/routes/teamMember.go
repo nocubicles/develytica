@@ -72,21 +72,20 @@ func TeamMemberHandler(w http.ResponseWriter, r *http.Request) {
 		db.Raw(`
 			SELECT 
 			issue_labels.name as skillname,
-			count(issue_assignees.issue_id) as donecount,
-			issues.closed_at as lastused
+			count(issue_assignees.issue_id) as donecount
 			FROM issue_assignees
 			LEFT JOIN issue_labels ON issue_labels.issue_id = issue_assignees.issue_id
 			LEFT JOIN label_trackings ON label_trackings.name = issue_labels.name
-			LEFT JOIN issues ON issues.remote_id = issue_assignees.issue_id
 			WHERE issue_assignees.tenant_id = ?
 			AND issue_assignees.assignee_id = ?
 			AND label_trackings.is_tracked = true
-			GROUP BY skillname, lastused
+			GROUP BY skillname
 			ORDER BY donecount desc
 		`, user.TenantID, teamMemberID).
 			Scan(&userSkills)
 
 		for i := range userSkills {
+			userSkills[i].LastUsed = getIssueClosedAtByLabelName(user.TenantID, userSkills[i].SkillName)
 			userSkills[i].LastUsedDaysAgo = daysBetween(time.Now(), userSkills[i].LastUsed)
 		}
 
@@ -95,7 +94,27 @@ func TeamMemberHandler(w http.ResponseWriter, r *http.Request) {
 
 		return
 	}
+}
 
+func getIssueClosedAtByLabelName(tenantID uint, labelName string) time.Time {
+	db := utils.DbConnection()
+	type Result struct {
+		ClosedAt time.Time `gorm:"column:closed_at"`
+	}
+
+	result := Result{}
+	db.Raw(`
+		SELECT
+		issues.closed_at as closed_at
+		from issue_labels
+		left join issues ON issues.remote_id = issue_labels.issue_id
+		where tenant_id = ? and issue_labels.name = ? 
+		order by closed_at desc
+		limit 1
+	`, tenantID, labelName).
+		Scan(&result)
+
+	return result.ClosedAt
 }
 
 func daysBetween(a, b time.Time) int {
