@@ -39,7 +39,6 @@ func init() {
 		&models.Sync{},
 		&models.SyncHistory{},
 		&models.User{},
-		&models.Ad{},
 		&models.Session{},
 		&models.UserClaim{},
 		&models.Sync{},

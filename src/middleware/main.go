@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -11,9 +12,17 @@ import (
 	"github.com/nocubicles/develytica/src/utils"
 )
 
+func ForceHttps(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
+		http.Redirect(res, req, fmt.Sprintf("https://%s%s", req.Host, req.URL), http.StatusPermanentRedirect)
+		return
+	})
+}
+
 func CORS(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("x-forwarded-proto", "https")
 		next.ServeHTTP(w, r)
 	})
 }

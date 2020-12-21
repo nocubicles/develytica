@@ -8,7 +8,6 @@ import (
 type User struct {
 	gorm.Model
 	Email       string `gorm:"index"`
-	Ads         []Ad
 	Sessions    []Session
 	SignInToken uuid.UUID `gorm:"index"`
 	UserClaim   UserClaim

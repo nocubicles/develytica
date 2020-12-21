@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	"os"
 
 	"github.com/gorilla/mux"
 	"github.com/nocubicles/develytica/src/middleware"
@@ -34,5 +35,9 @@ func router() *mux.Router {
 	router.HandleFunc("/sync", middleware.CheckIsUsedLoggedIn(routes.Sync)).Methods(http.MethodPost, http.MethodOptions)
 	router.Use(mux.CORSMethodMiddleware(router))
 	router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("static/"))))
+
+	if os.Getenv("GO_ENV") == "PRODUCTION" {
+		router.Use(middleware.ForceHttps)
+	}
 	return router
 }
