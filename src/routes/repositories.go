@@ -55,6 +55,15 @@ func RepoHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		for key, values := range r.PostForm {
+			// repoLimit := utils.GetAvailableRepoLimit(user.TenantID)
+
+			// if len(values) > repoLimit {
+			// 	data.ValidationErrors = map[string]string{
+			// 		"limit": "Repo limit exceeded. Please choose less repos to track",
+			// 	}
+			// 	utils.Render(w, "repositories.gohtml", data)
+			// 	return
+			// }
 
 			if key == "repoTracked" && len(values) > 0 {
 				repoTracking := models.RepoTracking{}

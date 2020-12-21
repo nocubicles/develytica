@@ -4,18 +4,32 @@ import (
 	"github.com/nocubicles/develytica/src/models"
 )
 
-func IsRepoLimitOver(tenantID uint) bool {
+func GetAvailableRepoLimit(tenantID uint) int {
 	db := DbConnection()
 
 	tenantLimits := models.TenantLimit{}
 	tenantLimitResultsresult := db.First(&tenantLimits, tenantID)
-	repos := []models.Repo{}
 
 	if tenantLimitResultsresult.RowsAffected == 0 {
 		tenantLimits.Repos = 10
 	}
 
-	repoResults := db.Where("tenant_id = ?", tenantID).Find(&repos)
+	return tenantLimits.Repos
+
+}
+
+func IsRepoLimitOver(tenantID uint) bool {
+	db := DbConnection()
+
+	tenantLimits := models.TenantLimit{}
+	tenantLimitResultsresult := db.First(&tenantLimits, tenantID)
+	repoTrackings := []models.RepoTracking{}
+
+	if tenantLimitResultsresult.RowsAffected == 0 {
+		tenantLimits.Repos = 10
+	}
+
+	repoResults := db.Where("tenant_id = ?", tenantID).Find(&repoTrackings)
 
 	if repoResults.RowsAffected <= int64(tenantLimits.Org) {
 		return false
