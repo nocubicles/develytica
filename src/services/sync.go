@@ -152,6 +152,7 @@ func SyncGithubData(tenantID uint, syncName string, syncID uint) {
 				checkIfRateLimitErr(err)
 				checkIfAcceptedError(err)
 				fmt.Println(err)
+				continue
 			}
 
 			allOrgs = append(allOrgs, orgs...)
@@ -183,6 +184,7 @@ func SyncGithubData(tenantID uint, syncName string, syncID uint) {
 					checkIfRateLimitErr(err)
 					checkIfAcceptedError(err)
 					fmt.Println(err)
+					continue
 				}
 
 				allRepos = append(allRepos, repos...)
@@ -249,6 +251,7 @@ func SyncGithubData(tenantID uint, syncName string, syncID uint) {
 							checkIfRateLimitErr(err)
 							checkIfAcceptedError(err)
 							fmt.Println(err)
+							continue
 						}
 
 						SyncGithubIssues(issues, tenantID, tenantRepo.RemoteID)
@@ -287,6 +290,7 @@ func SyncGithubData(tenantID uint, syncName string, syncID uint) {
 					checkIfRateLimitErr(err)
 					checkIfAcceptedError(err)
 					fmt.Println(err)
+					continue
 				}
 
 				syncLabels(tenantID, labels)
