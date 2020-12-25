@@ -95,7 +95,6 @@ func getTeamMembersBySkillName(tenantID uint, teamMembers *[]TeamMember, skillNa
 			SELECT name
 			FROM issue_labels
 			WHERE issue_labels.issue_id = ia.issue_id
-			limit 1
 		) as il
 		on true
 		where a.tenant_id = ?
