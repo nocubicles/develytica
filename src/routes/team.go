@@ -38,10 +38,28 @@ func TeamHandler(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == http.MethodGet {
 
-		data.TeamMembers = *getTeamMembers(user.TenantID, &teamMembers, 100)
+		skills, ok := r.URL.Query()["skills"]
+
+		if !ok || len(skills[0]) < 1 {
+			data.TeamMembers = *getAllTeamMembers(user.TenantID, &teamMembers, 100)
+		} else if len(skills[0]) > 0 && checkSkillExist(user.TenantID, skills[0]) {
+			data.TeamMembers = *getTeamMembersBySkillName(user.TenantID, &teamMembers, skills[0], 100)
+		}
 		utils.Render(w, "team.gohtml", data)
 
 		return
 	}
 
+}
+
+func checkSkillExist(tenantID uint, skillName string) bool {
+	db := utils.DbConnection()
+	issueLabels := models.IssueLabel{}
+	result := db.Where("tenant_id = ? AND name = ?", tenantID, skillName).Find(&issueLabels).Limit(1)
+
+	if result.RowsAffected > 0 {
+		return true
+	}
+
+	return false
 }

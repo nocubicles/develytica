@@ -51,7 +51,7 @@ func RenderApp(w http.ResponseWriter, r *http.Request) {
 	data.ReposCount = ReposCount
 	data.OrganizationsCount = OrgCount
 	data.UsersCount = UsersCount
-	data.TeamMembers = *getTeamMembers(user.TenantID, &teamMembers, 10)
+	data.TeamMembers = *getAllTeamMembers(user.TenantID, &teamMembers, 10)
 
 	utils.Render(w, "app.gohtml", data)
 }

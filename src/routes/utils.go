@@ -84,9 +84,34 @@ func convertStringToUint(value string) uint {
 	return uint(u64)
 }
 
-func getTeamMembers(tenantID uint, teamMembers *[]TeamMember, limit int) *[]TeamMember {
+func getTeamMembersBySkillName(tenantID uint, teamMembers *[]TeamMember, skillName string, limit int) *[]TeamMember {
 	db := utils.DbConnection()
-	db.Raw(`select a.login, a.avatar_url, a.location, a.remote_id, count(ia.assignee_id) as issuescount
+	db.Raw(`
+		select a.login, a.avatar_url, a.location, a.remote_id, count(ia.assignee_id) as issuescount
+		from assignees a
+		left join issue_assignees ia on ia.assignee_id = a.remote_id
+		LEFT OUTER JOIN LATERAL
+		(
+			SELECT name
+			FROM issue_labels
+			WHERE issue_labels.issue_id = ia.issue_id
+			limit 1
+		) as il
+		on true
+		where a.tenant_id = ?
+		AND il.name = ?
+		group by a.login,a.avatar_url,a.location,a.remote_id
+		order by issuescount desc
+		limit ?
+		`, tenantID, skillName, limit).
+		Scan(&teamMembers)
+	return teamMembers
+}
+
+func getAllTeamMembers(tenantID uint, teamMembers *[]TeamMember, limit int) *[]TeamMember {
+	db := utils.DbConnection()
+	db.Raw(`
+		select a.login, a.avatar_url, a.location, a.remote_id, count(ia.assignee_id) as issuescount
 		from assignees a
 		left join issue_assignees ia on ia.assignee_id = a.remote_id
 		where a.tenant_id = ?

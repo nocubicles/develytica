@@ -28,7 +28,7 @@
                                 <tbody>
                                     {{range .Skills}}
                                     <tr>
-                                        <td>{{.SkillName}}</td>
+                                        <td><a href="/team?skills={{.SkillName}}">{{.SkillName}}</a></td>
                                         <td>{{.DoneCount}}</td>
                                         <td>{{.LastUsedDaysAgo}}</td>
                                     </tr>
