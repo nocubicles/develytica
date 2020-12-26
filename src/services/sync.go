@@ -85,7 +85,7 @@ func DoImmidiateFullSyncByTenantID(tenantID uint) {
 			}
 			updateSyncInProgress(&sync)
 			SyncGithubData(sync.TenantID, sync.Name, sync.ID)
-			updateSyncInProgress(&sync)
+			defer updateSyncInProgress(&sync)
 		}
 	}
 }
@@ -151,7 +151,7 @@ func SyncGithubData(tenantID uint, syncName string, syncID uint) {
 			if err != nil {
 				checkIfRateLimitErr(err)
 				checkIfAcceptedError(err)
-				fmt.Println(err)
+				utils.Logger.Warnw(err.Error(), "tenantID", tenantID)
 				break
 			}
 
@@ -183,7 +183,7 @@ func SyncGithubData(tenantID uint, syncName string, syncID uint) {
 				if err != nil {
 					checkIfRateLimitErr(err)
 					checkIfAcceptedError(err)
-					fmt.Println(err)
+					utils.Logger.Warnw(err.Error(), "tenantID", tenantID)
 					break
 				}
 
@@ -250,7 +250,7 @@ func SyncGithubData(tenantID uint, syncName string, syncID uint) {
 						if err != nil {
 							checkIfRateLimitErr(err)
 							checkIfAcceptedError(err)
-							fmt.Println(err)
+							utils.Logger.Warnw(err.Error(), "tenantID", tenantID)
 							break
 						}
 
@@ -289,7 +289,7 @@ func SyncGithubData(tenantID uint, syncName string, syncID uint) {
 				if err != nil {
 					checkIfRateLimitErr(err)
 					checkIfAcceptedError(err)
-					fmt.Println(err)
+					utils.Logger.Warnw(err.Error(), "tenantID", tenantID)
 					break
 				}
 
