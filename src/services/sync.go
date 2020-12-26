@@ -72,6 +72,7 @@ func ScanAndDoSyncs() {
 	}
 }
 
+// DoImmidiateFullSyncByTenantID will start full sync cycle
 func DoImmidiateFullSyncByTenantID(tenantID uint) {
 	syncs := []models.Sync{}
 	db := utils.DbConnection()
@@ -113,7 +114,7 @@ func DoFullSyncAllUsersPeriodic() {
 			}
 			updateSyncInProgress(&sync)
 			SyncGithubData(sync.TenantID, sync.Name, sync.ID)
-			updateSyncInProgress(&sync)
+			defer updateSyncInProgress(&sync)
 		}
 	}
 }
