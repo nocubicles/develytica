@@ -29,9 +29,9 @@ func HandleBillingSetup(w http.ResponseWriter, r *http.Request) {
 		LargePrice     string `json:"largePrice"`
 	}{
 		PublishableKey: os.Getenv("STRIPE_PUBLIC"),
-		SmallPrice:     fmt.Sprint("price_1I2hfsEuUDslru3nmuQ2VOvW"),
-		MediumPrice:    fmt.Sprint("price_1I2hgHEuUDslru3nOwoYrthP"),
-		LargePrice:     fmt.Sprint("price_1I2hgUEuUDslru3nLzgvPntG"),
+		SmallPrice:     os.Getenv("SMALL_PRODUCT"),
+		MediumPrice:    os.Getenv("MEDIUM_PRODUCT"),
+		LargePrice:     os.Getenv("LARGE_PRODUCT"),
 	})
 }
 
