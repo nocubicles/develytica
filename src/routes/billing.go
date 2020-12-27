@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/nocubicles/develytica/src/models"
+	"github.com/nocubicles/develytica/src/utils"
 	"github.com/stripe/stripe-go/v71"
 	"github.com/stripe/stripe-go/v71/checkout/session"
 )
@@ -33,12 +35,30 @@ func HandleBillingSetup(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+func HandleCheckoutCallback(w http.ResponseWriter, r *http.Request) {
+
+	sessionID := r.URL.Query().Get("session_id")
+
+	s, err := session.Get(sessionID, nil)
+	if err != nil {
+		fmt.Println(err)
+	}
+	db := utils.DbConnection()
+
+	db.Model(&models.Tenant{}).Where("id = ?",
+		convertStringToUint(s.ClientReferenceID)).
+		Update("stripe_id", s.Customer.ID)
+
+	http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+}
+
 func HandleCreateCheckoutSession(w http.ResponseWriter, r *http.Request) {
 	billingSecret := os.Getenv("STRIPE_SECRET")
 	stripe.Key = billingSecret
 	server := os.Getenv("SERVER")
-	successURL := server + "/billingsuccess?session_id={CHECKOUT_SESSION_ID}"
-	cancelURL := server + "/billingcancel"
+	successURL := server + "/billing/success?session_id={CHECKOUT_SESSION_ID}"
+	cancelURL := server + "/billing/fail"
+	authContext, _ := getAuthContextData(r)
 
 	if r.Method != http.MethodPost {
 		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
@@ -59,6 +79,7 @@ func HandleCreateCheckoutSession(w http.ResponseWriter, r *http.Request) {
 		params := &stripe.CheckoutSessionParams{
 			SuccessURL:         &successURL,
 			CancelURL:          &cancelURL,
+			ClientReferenceID:  stripe.String(fmt.Sprint(authContext.TenantID)),
 			PaymentMethodTypes: stripe.StringSlice([]string{"card"}),
 			Mode:               stripe.String(string(stripe.CheckoutSessionModeSubscription)),
 			LineItems: []*stripe.CheckoutSessionLineItemParams{

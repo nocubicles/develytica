@@ -32,6 +32,91 @@
             </div>
         </div>
     </div>
+    <script>
+        var showErrorMessage = function(message) {
+            var errorEl = document.getElementById("error-message")
+            errorEl.textContent = message;
+            errorEl.style.display = "block";
+        };
+
+        var handleFetchResult = function(result) {
+            if (!result.ok) {
+                return result.json().then(function(json) {
+                    if (json.error && json.error.message) {
+                        throw new Error(result.url + ' ' + result.status + ' ' + json.error.message);
+                    }
+                }).catch(function(err) {
+                    showErrorMessage(err);
+                    throw err;
+                });
+            }
+            return result.json();
+        };
+
+        var handleResult = function(result) {
+            if (result.error) {
+                showErrorMessage(result.error.message);
+            }
+        };
+
+        var createCheckoutSession = function(priceID) {
+            return fetch("/billing/create-checkout-session", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    priceID: priceID
+                })
+            }).then(function(result) {
+                return result.json();
+            });
+        }
+
+        fetch("/billing/setup")
+            .then(handleFetchResult)
+            .then(function(json) {
+                var publishableKey = json.publishableKey;
+                var smallPrice = json.smallPrice;
+                var mediumPrice = json.mediumPrice;
+                var largePrice = json.largePrice;
+
+                var stripe = Stripe(publishableKey);
+                document.getElementById("smallPlan")
+                    .addEventListener("click", function(event) {
+                        createCheckoutSession(smallPrice).then(function(data) {
+                            stripe
+                                .redirectToCheckout({
+                                    sessionId: data.sessionID
+                                })
+                                .then(handleResult);
+                        })
+                    })
+
+                document.getElementById("mediumPlan")
+                    .addEventListener("click", function(event) {
+                        createCheckoutSession(mediumPrice).then(function(data) {
+                            stripe
+                                .redirectToCheckout({
+                                    sessionId: data.sessionID
+                                })
+                                .then(handleResult);
+                        })
+                    })
+
+                document.getElementById("largePlan")
+                    .addEventListener("click", function(event) {
+                        createCheckoutSession(largePrice).then(function(data) {
+                            stripe
+                                .redirectToCheckout({
+                                    sessionId: data.sessionID
+                                })
+                                .then(handleResult);
+                        })
+                    })
+
+            })
+    </script>
 </body>
 
 </html>

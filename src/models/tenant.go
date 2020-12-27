@@ -11,4 +11,5 @@ type Tenant struct {
 	Syncs         []Sync
 	Claims        []UserClaim
 	SyncHistories []SyncHistory
+	StripeID      string
 }

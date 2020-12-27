@@ -36,6 +36,7 @@ func router() *mux.Router {
 
 	router.HandleFunc("/billing/setup", middleware.CheckIsUsedLoggedIn(routes.HandleBillingSetup)).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/billing/create-checkout-session", middleware.CheckIsUsedLoggedIn(routes.HandleCreateCheckoutSession)).Methods(http.MethodPost, http.MethodOptions)
+	router.HandleFunc("/billing/success", middleware.CheckIsUsedLoggedIn(routes.HandleCheckoutCallback)).Methods(http.MethodGet, http.MethodOptions)
 
 	router.HandleFunc("/manageaccount", middleware.CheckIsUsedLoggedIn(routes.RenderManageAccount)).Methods(http.MethodGet, http.MethodOptions)
 
