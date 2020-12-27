@@ -96,7 +96,7 @@ func HandleCreateCheckoutSession(w http.ResponseWriter, r *http.Request) {
 			json.NewEncoder(w).Encode(struct {
 				ErrorData string `json:"error"`
 			}{
-				ErrorData: "test",
+				ErrorData: err.Error(),
 			})
 			return
 		}
