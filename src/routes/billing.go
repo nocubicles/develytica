@@ -92,6 +92,7 @@ func HandleCreateCheckoutSession(w http.ResponseWriter, r *http.Request) {
 		s, err := session.New(params)
 
 		if err != nil {
+			utils.Logger.Errorw(err.Error(), "tenantID", authContext.TenantID)
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(struct {
 				ErrorData string `json:"error"`
