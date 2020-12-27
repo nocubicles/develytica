@@ -10,8 +10,9 @@ require (
 	github.com/jinzhu/gorm v1.9.16
 	github.com/joho/godotenv v1.3.0
 	github.com/lib/pq v1.8.0 // indirect
+	github.com/stripe/stripe-go/v71 v71.48.0
 	go.uber.org/multierr v1.6.0 // indirect
-	go.uber.org/zap v1.16.0 // indirect
+	go.uber.org/zap v1.16.0
 	golang.org/x/oauth2 v0.0.0-20201203001011-0b49973bad19
 	gorm.io/driver/postgres v1.0.5
 	gorm.io/gorm v1.20.8

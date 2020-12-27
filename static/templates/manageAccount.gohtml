@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+{{ template "head.gohtml" . }}
+
+<body>
+    {{ template "header.gohtml" . }}
+    <div class="container">
+        <div class="columns">
+            <div class="column is-3 ">
+                {{ template "side.gohtml" }}
+            </div>
+            <div class="column is-9">
+                <h2 class="title is-2">Manage your account</h2>
+                <div class="columns">
+                    <div class="column">
+                        <h1>Small</h1>
+                        <p>59$ / month</p>
+                        <button class="button is-link" id="smallPlan">Subscribe</button>
+                    </div>
+                    <div class="column">
+                        <h1>Medium</h1>
+                        <p>99$ / month</p>
+                        <button class="button is-link" id="mediumPlan">Subscribe</button>
+                    </div>
+                    <div class="column">
+                        <h1>Large</h1>
+                        <p>179$ / month</p>
+                        <button class="button is-link" id="largePlan">Subscribe</button>
+                    </div>
+                </div>
+                <div id="error-message" class="error-message"></div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

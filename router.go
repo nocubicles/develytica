@@ -33,6 +33,12 @@ func router() *mux.Router {
 	router.Handle("/teamskills", middleware.CheckIsUsedLoggedIn(routes.TeamSkillsHandler)).Methods(http.MethodGet, http.MethodOptions)
 
 	router.HandleFunc("/sync", middleware.CheckIsUsedLoggedIn(routes.Sync)).Methods(http.MethodPost, http.MethodOptions)
+
+	router.HandleFunc("/billing/setup", middleware.CheckIsUsedLoggedIn(routes.HandleBillingSetup)).Methods(http.MethodGet, http.MethodOptions)
+	router.HandleFunc("/billing/create-checkout-session", middleware.CheckIsUsedLoggedIn(routes.HandleCreateCheckoutSession)).Methods(http.MethodPost, http.MethodOptions)
+
+	router.HandleFunc("/manageaccount", middleware.CheckIsUsedLoggedIn(routes.RenderManageAccount)).Methods(http.MethodGet, http.MethodOptions)
+
 	router.Use(mux.CORSMethodMiddleware(router))
 	router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("static/"))))
 
