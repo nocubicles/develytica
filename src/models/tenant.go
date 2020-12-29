@@ -12,4 +12,7 @@ type Tenant struct {
 	Claims        []UserClaim
 	SyncHistories []SyncHistory
 	StripeID      string
+	Assignee      []Assignee
+	Label         []Label
+	LabelTracking []LabelTracking
 }

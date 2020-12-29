@@ -3,7 +3,7 @@ package models
 import "time"
 
 type Issue struct {
-	RemoteID          int64 `gorm:"primaryKey; not null"`
+	RemoteID          int64 `gorm:"primaryKey; not null;unique"`
 	RemoteRepoID      int64 `gorm:"primaryKey; not null"`
 	Number            int
 	State             string
