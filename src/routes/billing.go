@@ -57,7 +57,7 @@ func HandleCreateCheckoutSession(w http.ResponseWriter, r *http.Request) {
 	stripe.Key = billingSecret
 	server := os.Getenv("SERVER")
 	successURL := server + "/billing/success?session_id={CHECKOUT_SESSION_ID}"
-	cancelURL := server + "/billing/fail"
+	cancelURL := server
 	authContext, _ := getAuthContextData(r)
 
 	if r.Method != http.MethodPost {

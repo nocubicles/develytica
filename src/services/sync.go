@@ -85,7 +85,7 @@ func DoImmidiateFullSyncByTenantID(tenantID uint) {
 				continue
 			}
 			updateSyncInProgress(&sync)
-			SyncGithubData(sync.TenantID, sync.Name, sync.ID)
+			syncGithubData(sync.TenantID, sync.Name, sync.ID)
 			defer updateSyncInProgress(&sync)
 		}
 	}
@@ -113,7 +113,7 @@ func DoFullSyncAllUsersPeriodic() {
 				continue
 			}
 			updateSyncInProgress(&sync)
-			SyncGithubData(sync.TenantID, sync.Name, sync.ID)
+			syncGithubData(sync.TenantID, sync.Name, sync.ID)
 			defer updateSyncInProgress(&sync)
 		}
 	}
@@ -131,8 +131,8 @@ func checkIfAcceptedError(err error) {
 	}
 }
 
-//SyncGithubData syncs tenant data from github
-func SyncGithubData(tenantID uint, syncName string, syncID uint) {
+//syncGithubData syncs tenant data from github
+func syncGithubData(tenantID uint, syncName string, syncID uint) {
 	start := time.Now()
 	perPage := 100
 	db := utils.DbConnection()
