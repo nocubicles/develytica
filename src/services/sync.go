@@ -84,9 +84,7 @@ func DoImmidiateFullSyncByTenantID(tenantID uint) {
 			if isSyncInProgress(sync) {
 				continue
 			}
-			updateSyncInProgress(&sync)
 			syncGithubData(sync.TenantID, sync.Name, sync.ID)
-			defer updateSyncInProgress(&sync)
 		}
 	}
 }
@@ -112,9 +110,7 @@ func DoFullSyncAllUsersPeriodic() {
 			if isSyncInProgress(sync) {
 				continue
 			}
-			updateSyncInProgress(&sync)
 			syncGithubData(sync.TenantID, sync.Name, sync.ID)
-			defer updateSyncInProgress(&sync)
 		}
 	}
 }
@@ -136,6 +132,8 @@ func syncGithubData(tenantID uint, syncName string, syncID uint) {
 	start := time.Now()
 	perPage := 100
 	db := utils.DbConnection()
+	updateSyncInProgress(syncID, true)
+	defer updateSyncInProgress(syncID, false)
 
 	githubClient, ctx := utils.GetGithubClientByTenant(tenantID)
 
@@ -399,9 +397,11 @@ func isSyncInProgress(sync models.Sync) bool {
 	return false
 }
 
-func updateSyncInProgress(sync *models.Sync) {
+func updateSyncInProgress(syncID uint, status bool) {
 	db := utils.DbConnection()
-	sync.InProgress = !sync.InProgress
+	sync := models.Sync{}
+	db.Where("id = ?", syncID).First(&sync)
+	sync.InProgress = status
 	sync.LastRunSuccess = !sync.LastRunSuccess
 	sync.LastRun = time.Now()
 	db.Save(&sync)
