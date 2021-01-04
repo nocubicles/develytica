@@ -21,6 +21,6 @@ func Sync(w http.ResponseWriter, r *http.Request) {
 	result := db.First(&user, authContext.UserID)
 
 	if result.RowsAffected > 0 {
-		services.DoImmidiateFullSyncByTenantID(user.TenantID)
+		services.DoImmidiateFullSyncByTenantID(user.TenantID, db)
 	}
 }

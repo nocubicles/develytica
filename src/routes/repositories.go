@@ -78,7 +78,7 @@ func RepoHandler(w http.ResponseWriter, r *http.Request) {
 					reposTrackings = append(reposTrackings, repoTracking)
 				}
 				db.Create(&reposTrackings)
-				go services.DoImmidiateFullSyncByTenantID(user.TenantID)
+				go services.DoImmidiateFullSyncByTenantID(user.TenantID, db)
 			}
 		}
 		http.Redirect(w, r, "/repositories", http.StatusTemporaryRedirect)

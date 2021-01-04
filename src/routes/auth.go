@@ -21,7 +21,7 @@ var githubOauthConfig = &oauth2.Config{}
 
 func init() {
 	if os.Getenv("GO_ENV") != "PRODUCTION" {
-		err := godotenv.Load(".env")
+		err := godotenv.Load("../../.env")
 
 		if err != nil {
 			panic("cannot load .env file")
@@ -99,7 +99,7 @@ func setupUserFromGithub(code string) (models.User, error) {
 		result = db.Model(&userClaim).Where("user_id = ? AND provider = ? AND tenant_id = ?", user.ID, provider, user.TenantID).Update("access_token", token.AccessToken)
 		if result.RowsAffected > 0 {
 			services.UpdateSyncJobs(user.TenantID)
-			go services.DoImmidiateFullSyncByTenantID(user.TenantID)
+			go services.DoImmidiateFullSyncByTenantID(user.TenantID, db)
 		}
 	} else {
 		//new user, never seen before
@@ -115,7 +115,7 @@ func setupUserFromGithub(code string) (models.User, error) {
 
 		db.Create(&userClaim)
 		services.CreateSyncJobs(user.TenantID)
-		services.DoImmidiateFullSyncByTenantID(user.TenantID)
+		services.DoImmidiateFullSyncByTenantID(user.TenantID, db)
 	}
 	return user, nil
 }

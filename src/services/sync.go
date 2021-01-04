@@ -9,6 +9,7 @@ import (
 	"github.com/google/go-github/v33/github"
 	"github.com/nocubicles/develytica/src/models"
 	"github.com/nocubicles/develytica/src/utils"
+	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
 
@@ -73,9 +74,8 @@ func ScanAndDoSyncs() {
 }
 
 // DoImmidiateFullSyncByTenantID will start full sync cycle
-func DoImmidiateFullSyncByTenantID(tenantID uint) {
+func DoImmidiateFullSyncByTenantID(tenantID uint, db *gorm.DB) {
 	syncs := []models.Sync{}
-	db := utils.DbConnection()
 
 	result := db.Order("priority asc").Where("tenant_id = ?", tenantID).Find(&syncs)
 
@@ -162,8 +162,7 @@ func syncGithubData(tenantID uint, syncName string, syncID uint) {
 		}
 
 		for i := range allOrgs {
-			SyncGithubOrganization(allOrgs[i], tenantID, false)
-
+			SyncGithubOrganization(db, allOrgs[i], tenantID, false)
 		}
 		finishSyncHistory(syncHistory)
 
@@ -441,8 +440,7 @@ func SyncGithubIssues(issues []*github.Issue, tenantID uint, repoID int64) {
 }
 
 //SyncGithubOrganization syncs github organization to db
-func SyncGithubOrganization(githubOrg *github.Organization, tenantID uint, manuallyAdded bool) {
-	db := utils.DbConnection()
+func SyncGithubOrganization(db *gorm.DB, githubOrg *github.Organization, tenantID uint, manuallyAdded bool) {
 	org := models.Organization{}
 	org.AvatarURL = githubOrg.GetAvatarURL()
 	org.Collaborators = githubOrg.GetCollaborators()

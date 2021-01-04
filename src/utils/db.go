@@ -17,7 +17,7 @@ func init() {
 	var err error
 
 	if os.Getenv("GO_ENV") != "PRODUCTION" {
-		err := godotenv.Load(".env")
+		err := godotenv.Load("../../.env")
 
 		if err != nil {
 			panic("cannot load .env file")

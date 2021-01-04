@@ -88,7 +88,7 @@ func Organization(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if len(githubOrg.GetLogin()) > 0 {
-			services.SyncGithubOrganization(githubOrg, user.TenantID, true)
+			services.SyncGithubOrganization(db, githubOrg, user.TenantID, true)
 			orgResult := db.Where("tenant_ID = ?", user.TenantID).Find(&organizations)
 
 			if orgResult.RowsAffected > 0 {
